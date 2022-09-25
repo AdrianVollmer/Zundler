@@ -1,35 +1,35 @@
 var _ArrayBufferToBase64 = function (array_buffer) {
-  var binary = '';
-  var bytes = new Uint8Array(array_buffer);
-  var len = bytes.byteLength;
-  for (var i = 0; i < len; i++) {
-      binary += String.fromCharCode(bytes[i])
-  }
-  return window.btoa(binary);
+    var binary = '';
+    var bytes = new Uint8Array(array_buffer);
+    var len = bytes.byteLength;
+    for (var i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i])
+    }
+    return window.btoa(binary);
 };
 
 
 var _base64ToArrayBuffer = function (base64) {
-  if (!base64) { return []}
-  var binary_string = window.atob(base64);
-  var len = binary_string.length;
-  var bytes = new Uint8Array(len);
-  for (var i = 0; i < len; i++) {
-      bytes[i] = binary_string.charCodeAt(i);
-  }
-  return bytes.buffer;
+    if (!base64) { return []}
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
 };
 
 var createIframe = function() {
-  var iframe = document.getElementById('main');
-  if (iframe) { iframe.remove() };
-  iframe = document.createElement("iframe");
-  window.document.body.prepend(iframe);
-  iframe.setAttribute('src', '#');
-  iframe.setAttribute('name', 'main');
-  iframe.setAttribute('id', 'main');
-  iframe.style.display = 'none';
-  return iframe;
+    var iframe = document.getElementById('main');
+    if (iframe) { iframe.remove() };
+    iframe = document.createElement("iframe");
+    window.document.body.prepend(iframe);
+    iframe.setAttribute('src', '#');
+    iframe.setAttribute('name', 'main');
+    iframe.setAttribute('id', 'main');
+    iframe.style.display = 'none';
+    return iframe;
 }
 
 var load_virtual_page = (function (path, get_params, anchor) {
