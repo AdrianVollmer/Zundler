@@ -38,6 +38,7 @@ def embed_assets(index_file):
         'inject.js',
         'init.css',
         'init.html',
+        'monkeypatch.js',
         'pako.min.js',
     ]:
         path = os.path.join(SCRIPT_PATH, filename)
@@ -48,7 +49,12 @@ def embed_assets(index_file):
     new_base_name = 'SELF_CONTAINED_' + base_name
     result_file = os.path.join(base_dir, new_base_name)
 
-    file_tree = load_filetree(base_dir, init_files['inject.js'], exclude_pattern=new_base_name)
+    file_tree = load_filetree(
+        base_dir,
+        before=init_files['monkeypatch.js'],
+        after=init_files['inject.js'],
+        exclude_pattern=new_base_name,
+    )
     file_tree = json.dumps(file_tree)
     logger.debug('total asset size: %d' % len(file_tree))
     file_tree = deflate(file_tree)
@@ -86,7 +92,7 @@ def embed_assets(index_file):
     return result_file
 
 
-def pack_file(filename, js):
+def pack_file(filename, before, after):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, 'rb').read()
@@ -101,7 +107,12 @@ def pack_file(filename, js):
         data = base64.b64encode(data)
 
     elif ext in ['html', 'htm']:
-        data = embed_html_resources(data, os.path.dirname(filename), js).encode()
+        data = embed_html_resources(
+            data,
+            os.path.dirname(filename),
+            before,
+            after,
+        ).encode()
 
     if not isinstance(data, str):
         try:
@@ -120,16 +131,22 @@ def deflate(data):
     return data
 
 
-def embed_html_resources(html, base_dir, js):
+def embed_html_resources(html, base_dir, before, after):
     """Embed fonts in preload links to avoid jumps when loading"""
     # This cannot be done in JavaScript, it would be too late
 
     import bs4
     soup = bs4.BeautifulSoup(html, 'lxml')
 
-    script = soup.new_tag("script")
-    script.string = js
-    soup.find('body').append(script)
+    if before:
+        script = soup.new_tag("script")
+        script.string = before
+        soup.find('body').insert(0, script)
+
+    if after:
+        script = soup.new_tag("script")
+        script.string = after
+        soup.find('body').append(script)
 
     return str(soup)
 
@@ -202,7 +219,7 @@ def embed_css_resources(css, filename):
     return css
 
 
-def load_filetree(base_dir, js, exclude_pattern=None):
+def load_filetree(base_dir, before=None, after=None, exclude_pattern=None):
     """Load entire directory in a dict"""
 
     result = {}
@@ -214,7 +231,8 @@ def load_filetree(base_dir, js, exclude_pattern=None):
             key = path.relative_to(base_dir).as_posix()
             result[key] = pack_file(
                 path.as_posix(),
-                js,
+                before,
+                after,
             )
             logger.debug('Packed file %s [%d]' % (key, len(result[key])))
 

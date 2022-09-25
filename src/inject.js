@@ -51,8 +51,17 @@ var split_url = function(url) {
 var virtual_click = function(evnt) {
     // Handle GET parameters and anchors
     console.log("Virtual click", evnt);
-    var a = evnt.currentTarget;
-    let [path, get_parameters, anchor] = split_url(a.getAttribute('href'));
+    var el = evnt.currentTarget;
+    var name = el.tagName.toLowerCase();
+    if (name == 'a') {
+        var [path, get_parameters, anchor] = split_url(el.getAttribute('href'));
+    } else if (name == 'form') {
+        var [path, get_parameters, anchor] = split_url(el.getAttribute('action'));
+        const formData = new FormData(el);
+        get_parameters = new URLSearchParams(formData).toString();
+    } else {
+        console.error("Invalid element", el);
+    }
     path = normalize_path(path);
 
     window.parent.postMessage({
@@ -79,14 +88,8 @@ var fix_links = function(origin) {
 var fix_forms = function(origin) {
     Array.from(document.querySelectorAll("form")).forEach( form => {
         var href = form.getAttribute('action');
-        if (is_virtual(href)) {
-            // TODO test this
-            // let [path, get_parameters, anchor] = split_url(href);
-            // path = normalize_path(path);
-            // var new_href = to_blob(retrieve_file(path), 'text/html');
-            // if (get_parameters) { new_href += '?' + get_parameters; }
-            // if (anchor) { new_href += '?' + anchor; }
-            // form.action = new_href;
+        if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+            form.addEventListener('submit', virtual_click);
         }
     });
 };
@@ -164,11 +167,17 @@ window.addEventListener("message", (evnt) => {
         console.log("Received data from parent", window.data);
         // dynamically fix elements on this page
         try {
+            embed_js(); // This might change the DOM, so do this first
             embed_css();
             fix_links();
             fix_forms();
             embed_img();
-            embed_js();
+            // Trigger DOMContentLoaded again, some scripts that have just
+            // been executed expect it.
+            window.document.dispatchEvent(new Event("DOMContentLoaded", {
+                bubbles: true,
+                cancelable: true
+            }));
         } finally {
             window.parent.postMessage({
                 action: "show_iframe",
@@ -177,6 +186,7 @@ window.addEventListener("message", (evnt) => {
         }
     }
 }, false);
+
 
 // Set parent window title
 window.parent.postMessage({

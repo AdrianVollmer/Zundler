@@ -32,13 +32,41 @@ var createIframe = function() {
     return iframe;
 }
 
+// var load_blob = (function () {
+//     var a = document.createElement("a");
+//     document.body.appendChild(a);
+//     a.style = "display: none";
+//     return function (data, get_params, anchor) {
+//         var blob = new Blob([data], {type: "text/html"}),
+//             url = window.URL.createObjectURL(blob);
+//         if (get_params) {
+//             url += "?" + get_params; // This is considered a security issue
+//         }
+//         if (anchor) {
+//             url += "#" + anchor;
+//         }
+//         a.href = url;
+//         a.target = 'main';
+//         a.click();
+//         window.URL.revokeObjectURL(url);
+//     };
+// }());
+//
+// var load_virtual_page = (function (path, get_params, anchor) {
+//     const data = window.data.file_tree[path];
+//     var iframe = createIframe();
+//     load_blob(data, get_params, anchor);
+//     window.data.current_path = path;
+// });
+
 var load_virtual_page = (function (path, get_params, anchor) {
     const data = window.data.file_tree[path];
     var iframe = createIframe();
-    if (get_params) { iframe.src = path + '?' + get_params; }
-    else { iframe.src = path; }
+    window.data.get_parameters = get_params;
     iframe.contentDocument.write(data);
-    if (anchor) { iframe.contentDocument.location.hash = anchor; }
+    if (anchor) {
+        iframe.contentDocument.location.hash = anchor;
+    }
     window.data.current_path = path;
 });
 
