@@ -129,14 +129,6 @@ def embed_html_resources(html, base_dir, js):
     import bs4
     soup = bs4.BeautifulSoup(html, 'lxml')
 
-    for link in soup.select('head > link[rel="preload"][as="font"]'):
-        # Get filename relative to resource
-        filename = os.path.join(
-            base_dir,
-            link['href'],  # TODO convert from POSIX
-        )
-        link['href'] = to_data_uri(filename, mime_type=link['type'])
-
     script = soup.new_tag("script")
     script.string = js
     soup.find('body').append(script)
