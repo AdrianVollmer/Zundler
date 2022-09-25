@@ -17,14 +17,13 @@ var myGet = function (arg) {
     const originalResult = originalGet.apply(this, [arg]);
     // If searchtools.js of sphinx is used
     if (
-        (arg == "q" || arg == "highlight") &&
-        window.DOCUMENTATION_OPTIONS &&
-        window.Scorer &&
         window.data.get_parameters &&
-        (! originalResult)
+        (window.location.search === "") &&
+        (Array.from(this.entries()).length == 0)
     ) {
         const params = new URLSearchParams('?' + window.data.get_parameters);
-        const result = params.get("q");
+        const result = params.get(arg);
+        // console.log("Return virtual get parameter:", arg, result);
         return result;
     } else {
         return originalResult;

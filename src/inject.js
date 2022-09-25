@@ -1,4 +1,4 @@
-var embed_css = function(origin) {
+var embed_css = function() {
     Array.from(document.querySelectorAll("link")).forEach( link => {
         if (link.getAttribute('rel') == 'stylesheet') {
             const style = document.createElement("style");
@@ -12,7 +12,7 @@ var embed_css = function(origin) {
 };
 
 
-var embed_js = function(origin) {
+var embed_js = function() {
     Array.from(document.querySelectorAll("script")).forEach( oldScript => {
         const newScript = document.createElement("script");
         Array.from(oldScript.attributes).forEach( attr => {
@@ -77,15 +77,19 @@ var virtual_click = function(evnt) {
     return false;
 };
 
-var fix_links = function(origin) {
+var fix_links = function() {
     Array.from(document.querySelectorAll("a")).forEach( a => {
-        if (is_virtual(a.getAttribute('href'))) {
-            a.addEventListener('click', virtual_click);
-        }
+        fix_link(a);
     });
 };
 
-var fix_forms = function(origin) {
+var fix_link = function(a) {
+    if (is_virtual(a.getAttribute('href'))) {
+        a.addEventListener('click', virtual_click);
+    }
+};
+
+var fix_forms = function() {
     Array.from(document.querySelectorAll("form")).forEach( form => {
         var href = form.getAttribute('action');
         if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
@@ -95,7 +99,7 @@ var fix_forms = function(origin) {
 };
 
 
-var embed_img = function(origin) {
+var embed_img = function() {
     Array.from(document.querySelectorAll("img")).forEach( img => {
         if (img.hasAttribute('src')) {
             const src = img.getAttribute('src');
@@ -159,6 +163,15 @@ var normalize_path = function(path) {
 };
 
 
+var fix_document = function() {
+    embed_js(); // This might change the DOM, so do this first
+    embed_css();
+    embed_img();
+    fix_links();
+    fix_forms();
+};
+
+
 // Set up message listener
 window.addEventListener("message", (evnt) => {
     console.log("Received message in iframe", evnt);
@@ -167,11 +180,7 @@ window.addEventListener("message", (evnt) => {
         console.log("Received data from parent", window.data);
         // dynamically fix elements on this page
         try {
-            embed_js(); // This might change the DOM, so do this first
-            embed_css();
-            fix_links();
-            fix_forms();
-            embed_img();
+            fix_document();
             // Trigger DOMContentLoaded again, some scripts that have just
             // been executed expect it.
             window.document.dispatchEvent(new Event("DOMContentLoaded", {
@@ -188,7 +197,23 @@ window.addEventListener("message", (evnt) => {
 }, false);
 
 
-// Set parent window title
+const observer = new MutationObserver((mutationList) => {
+    // console.log("Fix mutated elements...", mutationList);
+    mutationList.forEach((mutation) => {
+        if (mutation.type == 'childList') {
+            Array.from(mutation.target.querySelectorAll("a")).forEach( a => {
+                fix_link(a);
+            });
+            Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
+                // embed_img TODO
+            });
+        }
+    });
+});
+observer.observe(window.document.body, {subtree: true, childList: true});
+
+
+// Set parent window title and trigger data transmission
 window.parent.postMessage({
     action: "set_title",
     argument: window.document.querySelector('head>title').innerText

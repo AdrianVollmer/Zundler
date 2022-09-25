@@ -68,6 +68,7 @@ var load_virtual_page = (function (path, get_params, anchor) {
         iframe.contentDocument.location.hash = anchor;
     }
     window.data.current_path = path;
+    //TODO fix history
 });
 
 window.onload = function() {
