@@ -89,31 +89,40 @@ var fix_link = function(a) {
     }
 };
 
+var fix_form = function(form) {
+    var href = form.getAttribute('action');
+    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+        form.addEventListener('submit', virtual_click);
+    }
+};
+
+
 var fix_forms = function() {
     Array.from(document.querySelectorAll("form")).forEach( form => {
-        var href = form.getAttribute('action');
-        if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-            form.addEventListener('submit', virtual_click);
-        }
+        fix_form(form);
     });
 };
 
 
-var embed_img = function() {
-    Array.from(document.querySelectorAll("img")).forEach( img => {
-        if (img.hasAttribute('src')) {
-            const src = img.getAttribute('src');
-            if (is_virtual(src)) {
-                var path = normalize_path(src);
-                const file = retrieve_file(path);
-                // TODO handle mime type
-                if (file.startsWith('<svg')) {
-                    img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
-                } else {
-                    img.setAttribute('src', "data:image/png;base64, " + file);
-                }
-            };
+var embed_img = function(img) {
+    if (img.hasAttribute('src')) {
+        const src = img.getAttribute('src');
+        if (is_virtual(src)) {
+            var path = normalize_path(src);
+            const file = retrieve_file(path);
+            // TODO handle mime type
+            if (file.startsWith('<svg')) {
+                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
+            } else {
+                img.setAttribute('src', "data:image/png;base64, " + file);
+            }
         };
+    };
+};
+
+var embed_imgs = function() {
+    Array.from(document.querySelectorAll("img")).forEach( img => {
+        embed_img(img);
     });
 };
 
@@ -166,7 +175,7 @@ var normalize_path = function(path) {
 var fix_document = function() {
     embed_js(); // This might change the DOM, so do this first
     embed_css();
-    embed_img();
+    embed_imgs();
     fix_links();
     fix_forms();
 };
@@ -205,7 +214,10 @@ const observer = new MutationObserver((mutationList) => {
                 fix_link(a);
             });
             Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
-                // embed_img TODO
+                embed_img(img);
+            });
+            Array.from(mutation.target.querySelectorAll("form")).forEach( form => {
+                fix_form(form);
             });
         }
     });
