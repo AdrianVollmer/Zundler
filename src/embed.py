@@ -8,10 +8,9 @@ It creates an HTML file that has three script tags:
 3. Some boostrap code that fixes the HTML so it loads all assets from the
 virtual file tree instead of the file system
 
-TODO:
-* JS dependencies like mathjax don't work
-* CSS delay noticable when using fonts
-* CSS files can import other files with `@import`
+Also, two scripts are injected into all HTML files in the file tree. One as
+the first child of <body>, one as the last. The first does some
+monkeypatching, the last sets up all magic.
 
 Author: Adrian Vollmer
 
@@ -92,10 +91,23 @@ def embed_assets(index_file):
     return result_file
 
 
-def pack_file(filename, before, after):
+def prepare_file(filename, before, after):
+    """Prepare a file for the file tree
+
+    Referenced assets in CSS files will be embedded.
+    HTML files will be injected with two scripts.
+
+    `filename`: The name of the file
+    `before`: Javascript code that will be inserted as the first child of
+        `<body>` if the file is HTML.
+    `after`: Javascript code that will be inserted as the last child of
+        `<body>` if the file is HTML.
+
+    """
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, 'rb').read()
+
     if ext == 'css':
         # assuming all CSS files have names ending in '.css'
         data = embed_css_resources(data, filename)
@@ -148,10 +160,15 @@ def embed_html_resources(html, base_dir, before, after):
         script.string = after
         soup.find('body').append(script)
 
+    # TODO embed remote resources in case we want the entire file to be
+    # usable in an offline environment 
+
     return str(soup)
 
 
 def to_data_uri(filename, mime_type=None):
+    """Create a data URI from the contents of a file"""
+
     data = open(filename, 'br').read()
     data = base64.b64encode(data)
     if not mime_type:
@@ -229,7 +246,7 @@ def load_filetree(base_dir, before=None, after=None, exclude_pattern=None):
             continue
         if path.is_file():
             key = path.relative_to(base_dir).as_posix()
-            result[key] = pack_file(
+            result[key] = prepare_file(
                 path.as_posix(),
                 before,
                 after,
