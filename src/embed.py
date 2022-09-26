@@ -41,7 +41,7 @@ def embed_assets(index_file):
         'monkeypatch.js',
         'pako.min.js',
     ]:
-        path = os.path.join(SCRIPT_PATH, filename)
+        path = os.path.join(SCRIPT_PATH, 'assets', filename)
         init_files[filename] = open(path, 'r').read()
 
     base_dir = os.path.dirname(index_file)
