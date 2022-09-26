@@ -32,33 +32,6 @@ var createIframe = function() {
     return iframe;
 }
 
-// var load_blob = (function () {
-//     var a = document.createElement("a");
-//     document.body.appendChild(a);
-//     a.style = "display: none";
-//     return function (data, get_params, anchor) {
-//         var blob = new Blob([data], {type: "text/html"}),
-//             url = window.URL.createObjectURL(blob);
-//         if (get_params) {
-//             url += "?" + get_params; // This is considered a security issue
-//         }
-//         if (anchor) {
-//             url += "#" + anchor;
-//         }
-//         a.href = url;
-//         a.target = 'main';
-//         a.click();
-//         window.URL.revokeObjectURL(url);
-//     };
-// }());
-//
-// var load_virtual_page = (function (path, get_params, anchor) {
-//     const data = window.data.file_tree[path];
-//     var iframe = createIframe();
-//     load_blob(data, get_params, anchor);
-//     window.data.current_path = path;
-// });
-
 var load_virtual_page = (function (path, get_params, anchor) {
     const data = window.data.file_tree[path];
     var iframe = createIframe();
@@ -68,7 +41,7 @@ var load_virtual_page = (function (path, get_params, anchor) {
         iframe.contentDocument.location.hash = anchor;
     }
     window.data.current_path = path;
-    //TODO fix history
+    window.history.pushState({path, get_params, anchor}, '', '#');
 });
 
 window.onload = function() {
@@ -104,13 +77,19 @@ window.onload = function() {
                 evnt.data.argument.anchor,
             );
         } else if (evnt.data.action == 'show_iframe') {
-            // iframe finished fixing the document
+            // iframe finished fixing the document and is ready to be shown;
+            // hide loading indicator
             var iframe = document.getElementById('main');
             iframe.style.display = '';
             var loading = document.getElementById('loading-indicator');
             loading.style.display = 'none';
         }
     }, false);
+
+    // Set up history event listener
+    window.addEventListener("popstate", (evnt) => {
+        load_virtual_page(evnt.state.path, evnt.state.get_params, evnt.state.anchor);
+    });
 
     // Load first page
     load_virtual_page(window.data.current_path, "", "");
