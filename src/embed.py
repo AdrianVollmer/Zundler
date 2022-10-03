@@ -75,7 +75,7 @@ def embed_assets(index_file):
 <body>{body}
 <script>window.global_context = {global_context}</script>
 <script>{pako} //# sourceURL=pako.js</script>
-<script>{init_js}</script>
+<script>{init_js} //# sourceURL=init.js</script>
 </body></html>
 """.format(
         style=init_files['init.css'],
