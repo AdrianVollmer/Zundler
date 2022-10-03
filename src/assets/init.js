@@ -1,3 +1,5 @@
+const iFrameId = 'main';
+
 var _ArrayBufferToBase64 = function (array_buffer) {
     var binary = '';
     var bytes = new Uint8Array(array_buffer);
@@ -21,13 +23,13 @@ var _base64ToArrayBuffer = function (base64) {
 };
 
 var createIframe = function() {
-    var iframe = document.getElementById('main');
+    var iframe = document.getElementById(iFrameId);
     if (iframe) { iframe.remove() };
     iframe = document.createElement("iframe");
     window.document.body.prepend(iframe);
     iframe.setAttribute('src', '#');
-    iframe.setAttribute('name', 'main');
-    iframe.setAttribute('id', 'main');
+    iframe.setAttribute('name', iFrameId);
+    iframe.setAttribute('id', iFrameId);
     iframe.style.display = 'none';
     return iframe;
 }
@@ -60,14 +62,14 @@ window.onload = function() {
             // iframe has finished loading and sent us its title
             // parent sets the title and responds with the data object
             window.document.title = evnt.data.argument;
-            var iframe = document.getElementById('main');
+            var iframe = document.getElementById(iFrameId);
             iframe.contentWindow.postMessage({
                 action: "set_data",
                 argument: window.data,
             }, "*");
         } else if (evnt.data.action == 'virtual_click') {
             // user has clicked on a link in the iframe
-            var iframe = document.getElementById('main');
+            var iframe = document.getElementById(iFrameId);
             iframe.remove()
             var loading = document.getElementById('loading-indicator');
             loading.style.display = '';
@@ -79,7 +81,7 @@ window.onload = function() {
         } else if (evnt.data.action == 'show_iframe') {
             // iframe finished fixing the document and is ready to be shown;
             // hide loading indicator
-            var iframe = document.getElementById('main');
+            var iframe = document.getElementById(iFrameId);
             iframe.style.display = '';
             var loading = document.getElementById('loading-indicator');
             loading.style.display = 'none';

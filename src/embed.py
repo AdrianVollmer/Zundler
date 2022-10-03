@@ -149,19 +149,20 @@ def embed_html_resources(html, base_dir, before, after):
 
     import bs4
     soup = bs4.BeautifulSoup(html, 'lxml')
+    body = soup.find('body')
 
-    if before:
+    if body and before:
         script = soup.new_tag("script")
         script.string = before
-        soup.find('body').insert(0, script)
+        body.insert(0, script)
 
-    if after:
+    if body and after:
         script = soup.new_tag("script")
         script.string = after
-        soup.find('body').append(script)
+        body.append(script)
 
     # TODO embed remote resources in case we want the entire file to be
-    # usable in an offline environment 
+    # usable in an offline environment
 
     return str(soup)
 

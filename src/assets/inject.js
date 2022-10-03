@@ -197,6 +197,7 @@ window.addEventListener("message", (evnt) => {
                 cancelable: true
             }));
         } finally {
+            observer.observe(window.document.body, {subtree: true, childList: true});
             window.parent.postMessage({
                 action: "show_iframe",
                 argument: "",
@@ -222,7 +223,6 @@ const observer = new MutationObserver((mutationList) => {
         }
     });
 });
-observer.observe(window.document.body, {subtree: true, childList: true});
 
 
 // Set parent window title and trigger data transmission
