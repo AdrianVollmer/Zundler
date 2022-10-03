@@ -61,19 +61,19 @@ def embed_assets(index_file):
 
     remote_resources = []
 
-    data = {
+    global_context = {
         'current_path': base_name,
         'file_tree': file_tree,
         'remote_resources': remote_resources,
     }
-    data = json.dumps(data)
+    global_context = json.dumps(global_context)
 
     result = """
 <!DOCTYPE html>
 <html>
 <head><style>{style}</style></head>
 <body>{body}
-<script>window.data = {data}</script>
+<script>window.global_context = {global_context}</script>
 <script>{pako} //# sourceURL=pako.js</script>
 <script>{init_js}</script>
 </body></html>
@@ -82,7 +82,7 @@ def embed_assets(index_file):
         init_js=init_files['init.js'],
         pako=init_files['pako.min.js'],
         body=init_files['init.html'],
-        data=data,
+        global_context=global_context,
     )
 
     with open(result_file, 'w') as fp:

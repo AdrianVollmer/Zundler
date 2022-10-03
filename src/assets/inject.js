@@ -141,14 +141,14 @@ var is_virtual = function(url) {
 
 var retrieve_file = function(path) {
     // console.log("Retrieving file: " + path);
-    var file_tree = window.data.file_tree;
+    var file_tree = window.global_context.file_tree;
     var file = file_tree[path];
     return file;
 };
 
 var normalize_path = function(path) {
     // make relative paths absolute
-    var result = window.data.current_path;
+    var result = window.global_context.current_path;
     result = result.split('/');
     result.pop();
     result = result.concat(path.split('/'));
@@ -167,7 +167,7 @@ var normalize_path = function(path) {
     });
 
     result = array.join('/');
-    // console.log(`Normalized path: ${path} -> ${result} (@${window.data.current_path})`);
+    // console.log(`Normalized path: ${path} -> ${result} (@${window.global_context.current_path})`);
     return result;
 };
 
@@ -185,8 +185,8 @@ var fix_document = function() {
 window.addEventListener("message", (evnt) => {
     console.log("Received message in iframe", evnt);
     if (evnt.data.action == 'set_data') {
-        window.data = evnt.data.argument;
-        console.log("Received data from parent", window.data);
+        window.global_context = evnt.data.argument;
+        console.log("Received data from parent", window.global_context);
         // dynamically fix elements on this page
         try {
             fix_document();

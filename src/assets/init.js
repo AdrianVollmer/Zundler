@@ -35,37 +35,37 @@ var createIframe = function() {
 }
 
 var load_virtual_page = (function (path, get_params, anchor) {
-    const data = window.data.file_tree[path];
+    const data = window.global_context.file_tree[path];
     var iframe = createIframe();
-    window.data.get_parameters = get_params;
+    window.global_context.get_parameters = get_params;
     iframe.contentDocument.write(data);
     if (anchor) {
         iframe.contentDocument.location.hash = anchor;
     }
-    window.data.current_path = path;
+    window.global_context.current_path = path;
     window.history.pushState({path, get_params, anchor}, '', '#');
 });
 
 window.onload = function() {
     // Set up the virtual file tree
-    var FT = window.data.file_tree;
+    var FT = window.global_context.file_tree;
     FT = _base64ToArrayBuffer(FT);
     FT = pako.inflate(FT)
     FT = new TextDecoder("utf-8").decode(FT);
     FT = JSON.parse(FT);
-    window.data.file_tree = FT;
+    window.global_context.file_tree = FT;
 
     // Set up message listener
     window.addEventListener("message", (evnt) => {
         console.log("Received message in parent", evnt);
         if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
-            // parent sets the title and responds with the data object
+            // parent sets the title and responds with the global_context object
             window.document.title = evnt.data.argument;
             var iframe = document.getElementById(iFrameId);
             iframe.contentWindow.postMessage({
                 action: "set_data",
-                argument: window.data,
+                argument: window.global_context,
             }, "*");
         } else if (evnt.data.action == 'virtual_click') {
             // user has clicked on a link in the iframe
@@ -94,5 +94,5 @@ window.onload = function() {
     });
 
     // Load first page
-    load_virtual_page(window.data.current_path, "", "");
+    load_virtual_page(window.global_context.current_path, "", "");
 }

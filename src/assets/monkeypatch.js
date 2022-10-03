@@ -7,7 +7,7 @@
  * creative.
  *
  * Here, we patch the `URLSearchParams` class so it returns the information
- * stored in `window.data.get_parameters`.
+ * stored in `window.global_context.get_parameters`.
  *
  */
 
@@ -17,11 +17,11 @@ var myGet = function (arg) {
     const originalResult = originalGet.apply(this, [arg]);
     // If searchtools.js of sphinx is used
     if (
-        window.data.get_parameters &&
+        window.global_context.get_parameters &&
         (window.location.search === "") &&
         (Array.from(this.entries()).length == 0)
     ) {
-        const params = new URLSearchParams('?' + window.data.get_parameters);
+        const params = new URLSearchParams('?' + window.global_context.get_parameters);
         const result = params.get(arg);
         // console.log("Return virtual get parameter:", arg, result);
         return result;
