@@ -108,6 +108,7 @@ def prepare_file(filename, before, after):
     ext = ext.lower()[1:]
     data = open(filename, 'rb').read()
     mime_type = mime_type_from_bytes(data)
+    base64encoded = False
 
     if ext == 'css':
         # assuming all CSS files have names ending in '.css'
@@ -118,6 +119,7 @@ def prepare_file(filename, before, after):
     ]:
         # JSON doesn't allow binary data
         data = base64.b64encode(data)
+        base64encoded = True
 
     elif ext in ['html', 'htm']:
         data = embed_html_resources(
@@ -138,6 +140,7 @@ def prepare_file(filename, before, after):
     result = {
         'data': data,
         'mime_type': mime_type,
+        'base64encoded': base64encoded,
     }
 
     return result

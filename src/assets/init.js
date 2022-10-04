@@ -22,6 +22,24 @@ var _base64ToArrayBuffer = function (base64) {
     return bytes.buffer;
 };
 
+
+var set_favicon = function(href) {
+    var favicon = document.createElement("link");
+    favicon.setAttribute('rel', 'shortcut icon');
+    href = normalize_path(href);
+    const file = window.global_context.file_tree[href];
+    if (file.mime_type == 'image/svg+xml') {
+        favicon.setAttribute('href', 'data:' + file.mime_type + ';charset=utf-8;base64,' + btoa(file.data));
+        favicon.setAttribute('type', file.mime_type);
+    } else {
+        if (file.base64encoded) {
+            favicon.setAttribute('href', 'data:' + file.mime_type + ';base64,' + file.data);
+        }
+    }
+    document.head.appendChild(favicon);
+};
+
+
 var createIframe = function() {
     var iframe = document.getElementById(iFrameId);
     if (iframe) { iframe.remove() };
@@ -46,6 +64,35 @@ var load_virtual_page = (function (path, get_params, anchor) {
     window.history.pushState({path, get_params, anchor}, '', '#');
 });
 
+
+var normalize_path = function(path) {
+    // TODO remove redundant definition of this function (in inject.js)
+    // make relative paths absolute
+    var result = window.global_context.current_path;
+    result = result.split('/');
+    result.pop();
+    result = result.concat(path.split('/'));
+
+    // resolve relative directories
+    var array = [];
+    Array.from(result).forEach( component => {
+        if (component == '..') {
+            if (array) {
+                array.pop();
+            }
+        } else if (component == '.') {
+        } else {
+            if (component) { array.push(component); }
+        }
+    });
+
+    result = array.join('/');
+    // console.log(`Normalized path: ${path} -> ${result} (@${window.global_context.current_path})`);
+    return result;
+};
+
+
+
 window.onload = function() {
     // Set up the virtual file tree
     var FT = window.global_context.file_tree;
@@ -61,7 +108,8 @@ window.onload = function() {
         if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
             // parent sets the title and responds with the global_context object
-            window.document.title = evnt.data.argument;
+            window.document.title = evnt.data.argument.title;
+            set_favicon(evnt.data.argument.favicon);
             var iframe = document.getElementById(iFrameId);
             iframe.contentWindow.postMessage({
                 action: "set_data",

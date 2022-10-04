@@ -228,5 +228,8 @@ const observer = new MutationObserver((mutationList) => {
 // Set parent window title and trigger data transmission
 window.parent.postMessage({
     action: "set_title",
-    argument: window.document.querySelector('head>title').innerText
+    argument: {
+        title: window.document.querySelector('head>title').innerText,
+        favicon: document.querySelector("link[rel*='icon']").getAttribute('href')
+    }
 }, '*');
