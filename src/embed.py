@@ -107,6 +107,7 @@ def prepare_file(filename, before, after):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, 'rb').read()
+    mime_type = mime_type_from_bytes(data)
 
     if ext == 'css':
         # assuming all CSS files have names ending in '.css'
@@ -134,7 +135,12 @@ def prepare_file(filename, before, after):
 
     logger.debug('loaded file: %s [%d]' % (filename, len(data)))
 
-    return data
+    result = {
+        'data': data,
+        'mime_type': mime_type,
+    }
+
+    return result
 
 
 def deflate(data):
@@ -217,9 +223,7 @@ def embed_css_resources(css, filename):
             mime_type = 'text/css'
             content = embed_css_resources(content, filename)
         else:
-            from io import BytesIO
-            from sphinx.util.images import guess_mimetype_for_stream
-            mime_type = guess_mimetype_for_stream(BytesIO(content))
+            mime_type = mime_type_from_bytes(content)
         if not mime_type:
             logger.error('Unable to determine mime type: %s' % path)
             mime_type = 'application/octet-stream'
@@ -235,6 +239,13 @@ def embed_css_resources(css, filename):
         css = css.replace(orig, new)
 
     return css
+
+
+def mime_type_from_bytes(buffer):
+    from io import BytesIO
+    from sphinx.util.images import guess_mimetype_for_stream
+    mime_type = guess_mimetype_for_stream(BytesIO(buffer))
+    return mime_type
 
 
 def load_filetree(base_dir, before=None, after=None, exclude_pattern=None):

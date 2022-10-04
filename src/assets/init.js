@@ -35,7 +35,7 @@ var createIframe = function() {
 }
 
 var load_virtual_page = (function (path, get_params, anchor) {
-    const data = window.global_context.file_tree[path];
+    const data = window.global_context.file_tree[path].data;
     var iframe = createIframe();
     window.global_context.get_parameters = get_params;
     iframe.contentDocument.write(data);
