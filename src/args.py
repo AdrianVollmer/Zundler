@@ -26,8 +26,13 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    'path',
-    help='path to the root HTML file',
+    'input_path',
+    help='input path to the root HTML file',
+)
+
+parser.add_argument(
+    '-o', '--output-path',
+    help='output path to resulting HTML file',
 )
 
 

@@ -29,7 +29,7 @@ SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 logger = logging.getLogger(__name__)
 
 
-def embed_assets(index_file):
+def embed_assets(index_file, output_path=None):
 
     init_files = {}
     for filename in [
@@ -46,7 +46,8 @@ def embed_assets(index_file):
     base_dir = os.path.dirname(index_file)
     base_name = os.path.basename(index_file)
     new_base_name = 'SELF_CONTAINED_' + base_name
-    result_file = os.path.join(base_dir, new_base_name)
+    if not output_path:
+        output_path = os.path.join(base_dir, new_base_name)
 
     file_tree = load_filetree(
         base_dir,
@@ -85,10 +86,10 @@ def embed_assets(index_file):
         global_context=global_context,
     )
 
-    with open(result_file, 'w') as fp:
+    with open(output_path, 'w') as fp:
         fp.write(result)
 
-    return result_file
+    return output_path
 
 
 def prepare_file(filename, before, after):

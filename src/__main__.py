@@ -3,7 +3,10 @@ def main():
     args = parse_args()
 
     from .embed import embed_assets
-    embed_assets(args.path)
+    embed_assets(
+        args.input_path,
+        output_path=args.output_path,
+    )
 
 
 if __name__ == "__main__":
