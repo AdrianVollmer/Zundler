@@ -10,7 +10,7 @@ except ImportError:
 try:
     __version__ = importlib_metadata.version(__package__ or __name__)
     #  __summary__ = importlib_metadata.metadata(__package__ or __name__)['summary']
-    __summary__ = "Convert distributed HTML docs to completely self-contained HTML docs"
+    __summary__ = "Bundle assets of distributed HTML docs into one self-contained HTML file"
 except importlib_metadata.PackageNotFoundError:
     __version__ = "??"
     __summary__ = "??"
