@@ -39,6 +39,7 @@ def embed_assets(index_file, output_path=None):
         'init.html',
         'monkeypatch.js',
         'pako.min.js',
+        'LICENSE',
     ]:
         path = os.path.join(SCRIPT_PATH, 'assets', filename)
         init_files[filename] = open(path, 'r').read()
@@ -77,13 +78,14 @@ def embed_assets(index_file, output_path=None):
 <script>window.global_context = {global_context}</script>
 <script>{pako} //# sourceURL=pako.js</script>
 <script>{init_js} //# sourceURL=init.js</script>
-</body></html>
+</body><!-- {license} --></html>
 """.format(
         style=init_files['init.css'],
         init_js=init_files['init.js'],
         pako=init_files['pako.min.js'],
         body=init_files['init.html'],
         global_context=global_context,
+        license=init_files['LICENSE'],
     )
 
     with open(output_path, 'w') as fp:
