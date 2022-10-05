@@ -41,8 +41,11 @@ Limitations
 
 This approach is quite hacky, but it might work well enough for some purposes.
 
-Some scripts may break as the execution flow is different than some scripts
-expect.
+* Some scripts may break as the execution flow is different than some scripts
+  expect. For example, HTML forms with `method="GET"` to local HTML files only
+  work if the receiving code uses URLSearchParams, as same-origin policies
+  forbid reading GET parameters otherwise.
+* Opening links in a new tab won't work
 
 
 Installation
@@ -61,26 +64,16 @@ An entry point called `zundler` will appear in `~/.local/bin`.
 Bundling Sphinx docs
 --------------------
 
-Providing a Sphinx extension does not make sense, because it would need to
-add a new builder. Similar to the `latexpdf` 
+The Zundler package provides a Sphinx extension that adds an appropriate
+builder. The builder is a thin wrapper around the HTML builder, which runs
+`zundler` at the end. It can be used with `sphinx-build -b zundler` or, if
+there is a suitable Makefile, with `make zundler`.
 
-Suggested Makefile addition:
-
-```make
-.PHONY: zundler
-latexpdf:
-    $(SPHINXBUILD) -b zundler $(ALLSPHINXOPTS) $(BUILDDIR)/html
-    @echo "Bundle asset into one self-contained HTML file..."
-    $(MAKE) -C $(BUILDDIR)/html
-    @echo "Zundler finished; the HTML file is in $(BUILDDIR)/zundler."
-```
 
 Demos
 -----
 
 ...
-
-
 
 
 Copyright

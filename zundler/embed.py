@@ -9,7 +9,7 @@ It creates an HTML file that has three script tags:
 virtual file tree instead of the file system
 
 Also, two scripts are injected into all HTML files in the file tree. One as
-the first child of <body>, one as the last. The first does some
+the first child of <head>, one as the last child of <body>. The first does some
 monkeypatching, the last sets up all magic.
 
 Author: Adrian Vollmer
@@ -162,11 +162,12 @@ def embed_html_resources(html, base_dir, before, after):
     import bs4
     soup = bs4.BeautifulSoup(html, 'lxml')
     body = soup.find('body')
+    head = soup.find('head')
 
-    if body and before:
+    if head and before:
         script = soup.new_tag("script")
         script.string = before
-        body.insert(0, script)
+        head.insert(0, script)
 
     if body and after:
         script = soup.new_tag("script")
