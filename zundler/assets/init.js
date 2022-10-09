@@ -28,6 +28,7 @@ var set_favicon = function(href) {
     favicon.setAttribute('rel', 'shortcut icon');
     href = normalize_path(href);
     const file = window.global_context.file_tree[href];
+    if (!file) {return;}
     if (file.mime_type == 'image/svg+xml') {
         favicon.setAttribute('href', 'data:' + file.mime_type + ';charset=utf-8;base64,' + btoa(file.data));
         favicon.setAttribute('type', file.mime_type);
