@@ -142,8 +142,13 @@ var is_virtual = function(url) {
 var retrieve_file = function(path) {
     // console.log("Retrieving file: " + path);
     var file_tree = window.global_context.file_tree;
-    var file = file_tree[path].data;
-    return file;
+    var file = file_tree[path];
+    if (!file) {
+        console.log("File not found: " + path);
+        return "";
+    } else {
+        return file.data;
+    }
 };
 
 var normalize_path = function(path) {
