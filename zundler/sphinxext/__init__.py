@@ -15,8 +15,13 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
     name = 'zundler'
     epilog = ""
 
-    def __init__(self, app, env):
-        super().__init__(app, env)
+    def __init__(self, app, env=None):
+        try:
+            super().__init__(app, env)
+        except TypeError:
+            # Sphinx<=4 expects only `app`
+            super().__init__(app)
+
         self.epilog = (
             'Your self-contained HTML file is now in %s.' %
             relpath(self.app.original_outdir)
