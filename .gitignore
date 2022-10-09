@@ -36,11 +36,10 @@ cover/
 output/*.html
 output/*/index.html
 
-# pbr
-AUTHORS
-ChangeLog
-
 # Editors
 *~
 .*.swp
 .*sw?
+
+# Sphinx
+_build
