@@ -53,15 +53,27 @@ var createIframe = function() {
 }
 
 var load_virtual_page = (function (path, get_params, anchor) {
-    const data = window.global_context.file_tree[path].data;
+    // fill the iframe with the new page
+    // return True if it worked
+    // return False if loading indicator should be removed right away
+    const file = window.global_context.file_tree[path];
+    const data = file.data;
     var iframe = createIframe();
     window.global_context.get_parameters = get_params;
-    iframe.contentDocument.write(data);
-    if (anchor) {
-        iframe.contentDocument.location.hash = anchor;
+    if (file.mime_type == 'text/html') {
+        iframe.setAttribute("srcdoc", data);
+        if (anchor) {
+            iframe.contentDocument.location.hash = anchor;
+        }
+        window.global_context.current_path = path;
+        window.history.pushState({path, get_params, anchor}, '', '#');
+        return true;
+    } else {
+        let blob = new Blob([data], {type: file.mime_type})
+        var url = URL.createObjectURL(blob)
+        var myWindow = window.open(url, "_blank");
+        return false;
     }
-    window.global_context.current_path = path;
-    window.history.pushState({path, get_params, anchor}, '', '#');
 });
 
 
@@ -117,22 +129,19 @@ window.onload = function() {
             }, "*");
         } else if (evnt.data.action == 'virtual_click') {
             // user has clicked on a link in the iframe
-            var iframe = document.getElementById(iFrameId);
-            iframe.remove()
-            var loading = document.getElementById('loading-indicator');
-            loading.style.display = '';
-            load_virtual_page(
+            show_loading_indictator();
+            var loaded = load_virtual_page(
                 evnt.data.argument.path,
                 evnt.data.argument.get_parameters,
                 evnt.data.argument.anchor,
             );
+            if (!loaded) {
+                console.log(loaded);
+                hide_loading_indictator();
+            }
         } else if (evnt.data.action == 'show_iframe') {
             // iframe finished fixing the document and is ready to be shown;
-            // hide loading indicator
-            var iframe = document.getElementById(iFrameId);
-            iframe.style.display = '';
-            var loading = document.getElementById('loading-indicator');
-            loading.style.display = 'none';
+            hide_loading_indictator();
         }
     }, false);
 
@@ -143,4 +152,20 @@ window.onload = function() {
 
     // Load first page
     load_virtual_page(window.global_context.current_path, "", "");
+}
+
+
+var show_loading_indictator = function() {
+    var iframe = document.getElementById(iFrameId);
+    iframe.remove()
+    var loading = document.getElementById('loading-indicator');
+    loading.style.display = '';
+}
+
+
+var hide_loading_indictator = function() {
+    var iframe = document.getElementById(iFrameId);
+    iframe.style.display = '';
+    var loading = document.getElementById('loading-indicator');
+    loading.style.display = 'none';
 }
