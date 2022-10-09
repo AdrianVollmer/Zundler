@@ -30,7 +30,7 @@ var embed_js = function() {
             }
         } catch (e) {
             // Make sure all scripts are loaded
-            console.error(e);
+            console.error("Caught error in " + oldScript.getAttribute("src"), e);
         }
     });
 };
