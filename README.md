@@ -46,6 +46,7 @@ This approach is quite hacky, but it might work well enough for some purposes.
   work if the receiving code uses URLSearchParams, as same-origin policies
   forbid reading GET parameters otherwise.
 * Opening links in a new tab won't work
+* Redirections won't work (yet)
 
 
 Installation
