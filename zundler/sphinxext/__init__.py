@@ -15,8 +15,8 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
     name = 'zundler'
     epilog = ""
 
-    def __init__(self, app):
-        super().__init__(app)
+    def __init__(self, app, env):
+        super().__init__(app, env)
         self.epilog = (
             'Your self-contained HTML file is now in %s.' %
             relpath(self.app.original_outdir)
