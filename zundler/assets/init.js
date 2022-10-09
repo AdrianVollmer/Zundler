@@ -24,6 +24,7 @@ var _base64ToArrayBuffer = function (base64) {
 
 
 var set_favicon = function(href) {
+    if (!href) {return;}
     var favicon = document.createElement("link");
     favicon.setAttribute('rel', 'shortcut icon');
     href = normalize_path(href);
