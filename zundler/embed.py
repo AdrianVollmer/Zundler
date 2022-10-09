@@ -249,9 +249,13 @@ def embed_css_resources(css, filename):
 
 
 def mime_type_from_bytes(buffer):
-    from io import BytesIO
-    from sphinx.util.images import guess_mimetype_for_stream
-    mime_type = guess_mimetype_for_stream(BytesIO(buffer))
+    try:
+        import magic
+        mime_type = magic.Magic(mime=True).from_buffer(buffer)
+    except Exception as e:
+        logger.error("Error while guessing mime type: " + str(buffer[:10]) + '...')
+        logger.error(str(e))
+        return 'application/octet-stream'
     return mime_type
 
 
