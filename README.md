@@ -69,6 +69,9 @@ builder. The builder is a thin wrapper around the HTML builder, which runs
 `zundler` at the end. It can be used with `sphinx-build -b zundler` or, if
 there is a suitable Makefile, with `make zundler`.
 
+Jupyter-Books can be built with `jupyter-book build --custom-builder
+zundler`. You may have to add a render priority for Zundler like
+[here](https://jupyterbook.org/en/stable/content/code-outputs.html#render-priority).
 
 Demos
 -----
