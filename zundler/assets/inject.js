@@ -144,7 +144,7 @@ var retrieve_file = function(path) {
     var file_tree = window.global_context.file_tree;
     var file = file_tree[path];
     if (!file) {
-        console.log("File not found: " + path);
+        console.warn("File not found: " + path);
         return "";
     } else {
         return file.data;
