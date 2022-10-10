@@ -44,9 +44,13 @@ def embed_assets(index_file, output_path=None):
         path = os.path.join(SCRIPT_PATH, 'assets', filename)
         init_files[filename] = open(path, 'r').read()
 
+    if not os.path.exists(index_file):
+        raise FileNotFoundError('no such file: %s' % index_file)
+
     base_dir = os.path.dirname(index_file)
     base_name = os.path.basename(index_file)
     new_base_name = 'SELF_CONTAINED_' + base_name
+
     if not output_path:
         output_path = os.path.join(base_dir, new_base_name)
 
@@ -91,6 +95,7 @@ def embed_assets(index_file, output_path=None):
     with open(output_path, 'w') as fp:
         fp.write(result)
 
+    logger.info('Result written to: %s' % output_path)
     return output_path
 
 
@@ -138,7 +143,7 @@ def prepare_file(filename, before, after):
         except UnicodeError:
             data = base64.b64encode(data).decode()
 
-    logger.debug('loaded file: %s [%d]' % (filename, len(data)))
+    logger.debug('loaded file: %s [%s, %d bytes]' % (filename, mime_type, len(data)))
 
     result = {
         'data': data,
