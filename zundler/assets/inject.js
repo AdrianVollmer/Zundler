@@ -64,6 +64,7 @@ var virtual_click = function(evnt) {
     } else {
         console.error("Invalid element", el);
     }
+
     path = normalize_path(path);
 
     window.parent.postMessage({
@@ -88,6 +89,8 @@ var fix_links = function() {
 var fix_link = function(a) {
     if (is_virtual(a.getAttribute('href'))) {
         a.addEventListener('click', virtual_click);
+    } else if (a.getAttribute('href').startsWith('#')) {
+        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
     }
 };
 
@@ -209,6 +212,9 @@ window.addEventListener("message", (evnt) => {
                 action: "show_iframe",
                 argument: "",
             }, '*');
+        }
+        if (window.global_context.anchor) {
+            document.location.href = "about:srcdoc#" + window.global_context.anchor;
         }
     }
 }, false);

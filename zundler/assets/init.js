@@ -59,15 +59,14 @@ var load_virtual_page = (function (path, get_params, anchor) {
     // return True if it worked
     // return False if loading indicator should be removed right away
     const file = window.global_context.file_tree[path];
-    const data = file.data;
     var iframe = createIframe();
+
+    const data = file.data;
     window.global_context.get_parameters = get_params;
     if (file.mime_type == 'text/html') {
         iframe.setAttribute("srcdoc", data);
-        if (anchor) {
-            iframe.contentDocument.location.hash = anchor;
-        }
         window.global_context.current_path = path;
+        window.global_context.anchor = anchor;
         window.history.pushState({path, get_params, anchor}, '', '#');
         return true;
     } else {
