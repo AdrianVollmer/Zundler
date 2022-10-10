@@ -184,6 +184,7 @@ var normalize_path = function(path) {
 
 var fix_document = function() {
     embed_js(); // This might change the DOM, so do this first
+    monkey_patch();
     embed_css();
     embed_imgs();
     fix_links();
@@ -256,6 +257,42 @@ var main = function() {
 
 
 window.addEventListener('load', main);
+
+var monkey_patch = function() {
+    if (typeof jQuery === 'undefined') {return;} // Only for jQuery at the moment
+    /**
+     * Monkey patch getQueryParameters
+     * This function is defined in Sphinx' (v4) doctools.js and incompatible with our
+     * approach.
+     * This is a copy with effectively only the third line changed.
+     * See: https://github.com/sphinx-doc/sphinx/blob/2329fdef8c20c6c75194f5d842b8f62ebad5c79d/sphinx/themes/basic/static/doctools.js#L54
+     */
+    jQuery._getQueryParameters = jQuery.getQueryParameters;
+    jQuery.getQueryParameters = function(s) {
+      if (typeof s === 'undefined')
+        s = '?' + window.global_context.get_parameters;
+      return jQuery._getQueryParameters(s);
+    };
+
+    /**
+     * Monkey patch jQuery.ajax
+     * Only settings.url and settings.complete are supported for virtual
+     * URLs.
+     */
+    jQuery._ajax = jQuery.ajax;
+    jQuery.ajax = function(settings) {
+        url = normalize_path(settings.url);
+        if (is_virtual(url)) {
+            var result;
+            var data;
+            data = retrieve_file(url);
+            result = settings.complete({responseText: data}, "");
+            return; // Return value not actually needed in searchtools.js
+        } else {
+            return jQuery.ajax(settings);
+        };
+    };
+}
 
 
 //# inject.js
