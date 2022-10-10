@@ -232,17 +232,24 @@ const observer = new MutationObserver((mutationList) => {
 });
 
 
-// Set parent window title and trigger data transmission
-var favicon = window.document.querySelector("link[rel*='icon']");
-if (favicon) { favicon = favicon.getAttribute('href'); }
-var title = window.document.querySelector('head>title');
-if (title) { title = title.innerText; }
+var main = function() {
+    // Set parent window title and trigger data transmission
+    var favicon = window.document.querySelector("link[rel*='icon']");
+    if (favicon) { favicon = favicon.getAttribute('href'); }
+    var title = window.document.querySelector('head>title');
+    if (title) { title = title.innerText; }
 
-window.parent.postMessage({
-    action: "set_title",
-    argument: {
-        title: title,
-        favicon: favicon
-    }
-}, '*');
+    window.parent.postMessage({
+        action: "set_title",
+        argument: {
+            title: title,
+            favicon: favicon
+        }
+    }, '*');
+};
+
+
+window.addEventListener('load', main);
+
+
 //# inject.js
