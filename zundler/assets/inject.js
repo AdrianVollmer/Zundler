@@ -50,9 +50,11 @@ var split_url = function(url) {
 
 var virtual_click = function(evnt) {
     // Handle GET parameters and anchors
-    console.log("Virtual click", evnt);
+    // console.log("Virtual click", evnt);
+
     var el = evnt.currentTarget;
     var name = el.tagName.toLowerCase();
+
     if (name == 'a') {
         var [path, get_parameters, anchor] = split_url(el.getAttribute('href'));
     } else if (name == 'form') {
