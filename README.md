@@ -3,6 +3,9 @@ Zundler
 
 Bundle assets of distributed HTML docs into one self-contained HTML file.
 
+<table><td>:warning: This is still experimental. Expect breakages! Feel free
+to open an issue with any information necessary to reproduce.</td></table>
+
 Naively building one HTML file out of a directory of HTML files that total
 dozens of megabytes quickly overwhelm modern browsers. Zundler solves this
 by taking the following approach:
