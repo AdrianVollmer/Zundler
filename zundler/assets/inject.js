@@ -110,11 +110,11 @@ var embed_img = function(img) {
         if (is_virtual(src)) {
             var path = normalize_path(src);
             const file = retrieve_file(path);
-            // TODO handle mime type
-            if (file.startsWith('<svg')) {
+            const mime_type = window.global_context.file_tree[path].mime_type;
+            if (mime_type == 'image/svg+xml') {
                 img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
             } else {
-                img.setAttribute('src', "data:image/png;base64, " + file);
+                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
             }
         };
     };
