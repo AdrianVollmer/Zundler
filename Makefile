@@ -66,6 +66,19 @@ $(OUTPUT)/myst-parser.html:
 	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
+pygments: $(OUTPUT)/pygments.html
+
+
+$(OUTPUT)/pygments.html:
+	$(call prepare,pygments,pygments)
+	NAME=pygments ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
+	pip install wcag-contrast-ratio && \
+	cd $(DOWNLOAD)/$$NAME/doc && \
+	sphinx-build -b zundler . _build/zundler && \
+	cp _build/zundler/index.html ../../../$(OUTPUT)/$$NAME.html
+
+
 flask: $(OUTPUT)/flask.html
 
 
@@ -82,6 +95,6 @@ clean:
 	@rm -rf $(DOWNLOAD)
 
 
-all: sphinx cpython myst-parser flask
+all: sphinx cpython myst-parser flask pygments
 
-.PHONY: clean sphinx cpython myst-parser flask
+.PHONY: clean sphinx cpython myst-parser flask pygments
