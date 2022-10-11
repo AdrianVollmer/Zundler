@@ -32,14 +32,18 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
 
         from zundler.embed import embed_assets
 
+        root_doc = self.config.zundler_root_doc
+        if not root_doc:
+            root_doc = self.config.root_doc
+
         input_path = os.path.join(
             self.outdir,
-            self.config.root_doc + '.html',
+            root_doc + '.html',
         )
 
         output_path = os.path.join(
             self.app.original_outdir,
-            self.config.root_doc + '.html',
+            root_doc + '.html',
         )
 
         with progress_message(__('embedding HTML assets')):
@@ -64,6 +68,12 @@ def setup(app):
     app.outdir = outdir
     app.doctreedir = doctreedir
     Path(app.outdir).mkdir(parents=True, exist_ok=True)
+
+    app.add_config_value(
+        'zundler_root_doc',
+        None,
+        '',
+    )
 
     app.add_builder(ZundlerBuilder)
 
