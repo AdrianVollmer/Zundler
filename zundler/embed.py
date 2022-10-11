@@ -188,7 +188,10 @@ def embed_html_resources(html, base_dir, before, after):
 def to_data_uri(filename, mime_type=None):
     """Create a data URI from the contents of a file"""
 
-    data = open(filename, 'br').read()
+    try:
+        data = open(filename, 'br').read()
+    except FileNotFoundError as e:
+        logger.error(str(e))
     data = base64.b64encode(data)
     if not mime_type:
         mime_type = 'application/octet-stream'
@@ -224,7 +227,11 @@ def embed_css_resources(css, filename):
 
         path = os.path.dirname(filename) + '/' + path
 
-        content = open(path, 'rb').read()
+        try:
+            content = open(path, 'rb').read()
+        except FileNotFoundError as e:
+            logger.error(str(e))
+            continue
 
         # If it's binary, determine mime type and encode in base64
         if m['format']:
