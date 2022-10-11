@@ -37,9 +37,9 @@ $(OUTPUT)/sphinx.html:
 	$(call prepare,sphinx-doc,sphinx)
 	NAME=sphinx ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install $(DOWNLOAD)/$$NAME[doc] ; \
-	make -C $(DOWNLOAD)/$$NAME/docs zundler ; \
-	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+	pip install $(DOWNLOAD)/$$NAME[docs] ; \
+	make -C $(DOWNLOAD)/$$NAME/doc zundler ; \
+	cp $(DOWNLOAD)/$$NAME/doc/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 cpython: $(OUTPUT)/cpython.html
@@ -50,14 +50,38 @@ $(OUTPUT)/cpython.html:
 	NAME=cpython ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
 	pip install -r $(DOWNLOAD)/$$NAME/Doc/requirements.txt ; \
-	BUILDER=zundler make -C $(DOWNLOAD)/$$NAME/Doc build ; \
+	make -C $(DOWNLOAD)/$$NAME/Doc BUILDER=zundler SPHINXOPTS='-D zundler_root_doc=index' build ; \
 	cp $(DOWNLOAD)/$$NAME/Doc/build/zundler/index.html $(OUTPUT)/$$NAME.html
+
+
+myst-parser: $(OUTPUT)/myst-parser.html
+
+
+$(OUTPUT)/myst-parser.html:
+	$(call prepare,executablebooks,myst-parser)
+	NAME=myst-parser ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
+	pip install $(DOWNLOAD)/$$NAME[linkify,rtd] ; \
+	make -C $(DOWNLOAD)/$$NAME/docs zundler ; \
+	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+
+
+flask: $(OUTPUT)/flask.html
+
+
+$(OUTPUT)/flask.html:
+	$(call prepare,pallets,flask)
+	NAME=flask ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
+	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt ; \
+	make -C $(DOWNLOAD)/$$NAME/docs zundler ; \
+	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 clean:
 	@rm -rf $(DOWNLOAD)
 
 
-all: sphinx
+all: sphinx cpython myst-parser flask
 
-.PHONY: clean sphinx
+.PHONY: clean sphinx cpython myst-parser flask
