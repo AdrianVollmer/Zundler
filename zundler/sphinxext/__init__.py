@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from sphinx import version_info as sphinx_version_info
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import get_translation
 from sphinx.util import logging, progress_message
@@ -16,10 +17,9 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
     epilog = ""
 
     def __init__(self, app, env=None):
-        try:
+        if sphinx_version_info[0] >= 5:
             super().__init__(app, env)
-        except TypeError:
-            # Sphinx<=4 expects only `app`
+        else:
             super().__init__(app)
 
         self.epilog = (
