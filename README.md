@@ -51,6 +51,8 @@ This approach is quite hacky, but it might work well enough for some purposes.
   forbid reading GET parameters otherwise.
 * Opening links in a new tab won't work
 * Redirections won't work (yet)
+* Support of themes or extensions that require jQuery is wonky; fortunately
+  Sphinx stopped supporting jQuery in version 6
 
 
 Installation
