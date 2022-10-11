@@ -137,12 +137,15 @@ window.onload = function() {
                 evnt.data.argument.anchor,
             );
             if (!loaded) {
-                console.log(loaded);
                 hide_loading_indictator();
             }
         } else if (evnt.data.action == 'show_iframe') {
             // iframe finished fixing the document and is ready to be shown;
             hide_loading_indictator();
+            var iframe = document.getElementById(iFrameId);
+            iframe.contentWindow.postMessage({
+                action: "scroll_to_anchor",
+            }, "*");
         }
     }, false);
 

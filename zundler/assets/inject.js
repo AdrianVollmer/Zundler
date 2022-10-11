@@ -192,33 +192,33 @@ var fix_document = function() {
 };
 
 
-// Set up message listener
-window.addEventListener("message", (evnt) => {
-    console.log("Received message in iframe", evnt);
-    if (evnt.data.action == 'set_data') {
-        window.global_context = evnt.data.argument;
-        console.log("Received data from parent", window.global_context);
-        // dynamically fix elements on this page
-        try {
-            fix_document();
-            // Trigger DOMContentLoaded again, some scripts that have just
-            // been executed expect it.
-            window.document.dispatchEvent(new Event("DOMContentLoaded", {
-                bubbles: true,
-                cancelable: true
-            }));
-        } finally {
-            observer.observe(window.document.body, {subtree: true, childList: true});
-            window.parent.postMessage({
-                action: "show_iframe",
-                argument: "",
-            }, '*');
-        }
-        if (window.global_context.anchor) {
-            document.location.href = "about:srcdoc#" + window.global_context.anchor;
-        }
+var on_set_data = function(argument) {
+    window.global_context = argument;
+    console.log("Received data from parent", window.global_context);
+    // dynamically fix elements on this page
+    try {
+        fix_document();
+        // Trigger DOMContentLoaded again, some scripts that have just
+        // been executed expect it.
+        window.document.dispatchEvent(new Event("DOMContentLoaded", {
+            bubbles: true,
+            cancelable: true
+        }));
+    } finally {
+        observer.observe(window.document.body, {subtree: true, childList: true});
+        window.parent.postMessage({
+            action: "show_iframe",
+            argument: "",
+        }, '*');
     }
-}, false);
+}
+
+
+var on_scroll_to_anchor = function(argument) {
+    if (window.global_context.anchor) {
+        document.location.href = "about:srcdoc#" + window.global_context.anchor;
+    }
+}
 
 
 const observer = new MutationObserver((mutationList) => {
@@ -238,25 +238,6 @@ const observer = new MutationObserver((mutationList) => {
     });
 });
 
-
-var main = function() {
-    // Set parent window title and trigger data transmission
-    var favicon = window.document.querySelector("link[rel*='icon']");
-    if (favicon) { favicon = favicon.getAttribute('href'); }
-    var title = window.document.querySelector('head>title');
-    if (title) { title = title.innerText; }
-
-    window.parent.postMessage({
-        action: "set_title",
-        argument: {
-            title: title,
-            favicon: favicon
-        }
-    }, '*');
-};
-
-
-window.addEventListener('load', main);
 
 var monkey_patch = function() {
     if (typeof jQuery === 'undefined') {return;} // Only for jQuery at the moment
@@ -293,6 +274,37 @@ var monkey_patch = function() {
         };
     };
 }
+
+
+var on_load = function() {
+    // Set up message listener
+    window.addEventListener("message", (evnt) => {
+        console.log("Received message in iframe", evnt);
+        if (evnt.data.action == 'set_data') {
+            on_set_data(evnt.data.argument);
+        } else if (evnt.data.action == 'scroll_to_anchor') {
+            on_scroll_to_anchor(evnt.data.argument);
+        }
+    }, false);
+
+    // Set parent window title and trigger data transmission
+    var favicon = window.document.querySelector("link[rel*='icon']");
+    if (favicon) { favicon = favicon.getAttribute('href'); }
+    var title = window.document.querySelector('head>title');
+    if (title) { title = title.innerText; }
+
+    window.parent.postMessage({
+        action: "set_title",
+        argument: {
+            title: title,
+            favicon: favicon
+        }
+    }, '*');
+
+};
+
+
+window.addEventListener('load', on_load);
 
 
 //# inject.js
