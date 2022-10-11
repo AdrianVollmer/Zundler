@@ -43,3 +43,6 @@ output/*/index.html
 
 # Sphinx
 _build
+
+# Other
+_download
