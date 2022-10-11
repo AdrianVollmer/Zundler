@@ -216,7 +216,7 @@ var on_set_data = function(argument) {
 
 var on_scroll_to_anchor = function(argument) {
     if (window.global_context.anchor) {
-        document.location.href = "about:srcdoc#" + window.global_context.anchor;
+        document.location.replace("about:srcdoc#" + window.global_context.anchor);
     }
 }
 
