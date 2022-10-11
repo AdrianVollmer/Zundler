@@ -1,5 +1,5 @@
 DOWNLOAD ?= ./_download
-OUTPUT ?= ./www/output
+OUTPUT ?= ./docs/output
 
 define clone_repo =
 	if [ -d $(DOWNLOAD)/$(2) ] ; then \
