@@ -202,7 +202,7 @@ def to_data_uri(filename, mime_type=None):
 
 
 def embed_css_resources(css, filename):
-    """Replace url(<path>) with url(data:<mime_type>;base64, ...)
+    """Replace `url(<path>)` with `url(data:<mime_type>;base64, ...)`
 
     Also, handle @import."""
     # This uses some heuristics which will fail in general.
