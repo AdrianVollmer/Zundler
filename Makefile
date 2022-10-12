@@ -92,17 +92,31 @@ $(OUTPUT)/flask.html: Makefile
 	$(call prepare,pallets,flask)
 	NAME=flask ; \
 	DOCS=docs ; \
-	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt ; \
-	pip install -e $(DOWNLOAD)/$$NAME ; \
-	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
+	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
+	pip install -e $(DOWNLOAD)/$$NAME && \
+	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler SPHINXOPTS='-D zundler_append_post="window.addEventListener(\"load\", function(){window.document.querySelector(\"#searchbox\").style.display=\"\"});"' && \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+
+
+setuptools: $(OUTPUT)/setuptools.html
+
+
+$(OUTPUT)/setuptools.html: Makefile
+	$(call prepare,pypa,setuptools)
+	NAME=setuptools ; \
+	DOCS=docs ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
+	pip install -e $(DOWNLOAD)/$$NAME[docs] && \
+	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
+	sphinx-build -b zundler . _build/zundler && \
+	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 clean:
 	@rm -rf $(DOWNLOAD)
 
 
-all: sphinx cpython myst-parser flask pygments
+all: sphinx cpython myst-parser flask pygments setuptools
 
-.PHONY: all clean sphinx cpython myst-parser flask pygments
+.PHONY: all clean sphinx cpython myst-parser flask pygments setuptools
