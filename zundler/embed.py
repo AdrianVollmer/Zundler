@@ -202,9 +202,23 @@ def to_data_uri(filename, mime_type=None):
 
 
 def embed_css_resources(css, filename):
-    """Replace url(<path>) with url(data:<mime_type>;base64, ...)"""
-    # This uses some heuristics which could technically fail
+    """Replace url(<path>) with url(data:<mime_type>;base64, ...)
+
+    Also, handle @import."""
+    # This uses some heuristics which will fail in general.
+    # Eventually a library like tinycss2 might be preferable.
     import re
+
+    # First, make sure all @import's are using url(), because these are both valid:
+    # @import url("foo.css");
+    # @import "foo.css";
+    regex = rb'''(?P<rule>@import\s*['"]?(?P<url>.*?)['"]?\s*;)'''
+    replace_rules = {}
+    for m in re.finditer(regex, css, flags=re.IGNORECASE):
+        if not m['url'].lower().startswith(b'url('):
+            replace_rules[m['rule']] = b"@import url('%s');" % m['url']
+    for orig, new in replace_rules.items():
+        css = css.replace(orig, new)
 
     # Quotes are optional. But then URLs can contain escaped characters.
     regex = (
@@ -214,7 +228,7 @@ def embed_css_resources(css, filename):
 
     replace_rules = {}
 
-    for m in re.finditer(regex, css):
+    for m in re.finditer(regex, css, flags=re.IGNORECASE):
         if re.match(b'''['"]?data:.*''', m['url']):
             continue
 
