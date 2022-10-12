@@ -1,5 +1,7 @@
-DOWNLOAD ?= ./_download
-OUTPUT ?= ./docs/output
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+DOWNLOAD ?= $(ROOT_DIR)/_download
+OUTPUT ?= $(ROOT_DIR)/docs/output
+REF ?= main
 
 define clone_repo =
 	if [ -d $(DOWNLOAD)/$(2) ] ; then \
@@ -22,7 +24,7 @@ define prepare =
 	$(call clone_repo,$(1),$(2))
 	$(call create_venv,$(2))
 	. $(DOWNLOAD)/$(2)/venv/bin/activate ; \
-	pip install git+file:////$(PWD)@main
+	pip install git+file:////$(ROOT_DIR)@$(REF)
 endef
 
 
@@ -33,62 +35,67 @@ help:
 sphinx: $(OUTPUT)/sphinx.html
 
 
-$(OUTPUT)/sphinx.html:
+$(OUTPUT)/sphinx.html: Makefile
 	$(call prepare,sphinx-doc,sphinx)
 	NAME=sphinx ; \
+	DOCS=doc ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
 	pip install $(DOWNLOAD)/$$NAME[docs] ; \
-	make -C $(DOWNLOAD)/$$NAME/doc zundler ; \
-	cp $(DOWNLOAD)/$$NAME/doc/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
+	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 cpython: $(OUTPUT)/cpython.html
 
 
-$(OUTPUT)/cpython.html:
+$(OUTPUT)/cpython.html: Makefile
 	$(call prepare,python,cpython)
 	NAME=cpython ; \
+	DOCS=Doc ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install -r $(DOWNLOAD)/$$NAME/Doc/requirements.txt ; \
-	make -C $(DOWNLOAD)/$$NAME/Doc BUILDER=zundler SPHINXOPTS='-D zundler_root_doc=index' build ; \
-	cp $(DOWNLOAD)/$$NAME/Doc/build/zundler/index.html $(OUTPUT)/$$NAME.html
+	pip install -r $(DOWNLOAD)/$$NAME/$$DOCS/requirements.txt ; \
+	make -C $(DOWNLOAD)/$$NAME/$$DOCS BUILDER=zundler SPHINXOPTS='-D zundler_root_doc=index' build ; \
+	cp $(DOWNLOAD)/$$NAME/$$DOCS/build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 myst-parser: $(OUTPUT)/myst-parser.html
 
 
-$(OUTPUT)/myst-parser.html:
+$(OUTPUT)/myst-parser.html: Makefile
 	$(call prepare,executablebooks,myst-parser)
 	NAME=myst-parser ; \
+	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
 	pip install $(DOWNLOAD)/$$NAME[linkify,rtd] ; \
-	make -C $(DOWNLOAD)/$$NAME/docs zundler ; \
-	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
+	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 pygments: $(OUTPUT)/pygments.html
 
 
-$(OUTPUT)/pygments.html:
+$(OUTPUT)/pygments.html: Makefile
 	$(call prepare,pygments,pygments)
 	NAME=pygments ; \
+	DOCS=doc ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install wcag-contrast-ratio && \
-	cd $(DOWNLOAD)/$$NAME/doc && \
+	pip install -r $(DOWNLOAD)/$$NAME/requirements.txt && \
+	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
 	sphinx-build -b zundler . _build/zundler && \
-	cp _build/zundler/index.html ../../../$(OUTPUT)/$$NAME.html
+	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 flask: $(OUTPUT)/flask.html
 
 
-$(OUTPUT)/flask.html:
+$(OUTPUT)/flask.html: Makefile
 	$(call prepare,pallets,flask)
 	NAME=flask ; \
+	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
 	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt ; \
-	make -C $(DOWNLOAD)/$$NAME/docs zundler ; \
-	cp $(DOWNLOAD)/$$NAME/docs/_build/zundler/index.html $(OUTPUT)/$$NAME.html
+	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
+	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
 clean:
@@ -97,4 +104,4 @@ clean:
 
 all: sphinx cpython myst-parser flask pygments
 
-.PHONY: clean sphinx cpython myst-parser flask pygments
+.PHONY: all clean sphinx cpython myst-parser flask pygments
