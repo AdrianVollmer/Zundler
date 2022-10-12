@@ -46,9 +46,10 @@ Limitations
 This approach is quite hacky, but it might work well enough for some purposes.
 
 * Some scripts may break as the execution flow is different than some scripts
-  expect. For example, HTML forms with `method="GET"` to local HTML files only
-  work if the receiving code uses URLSearchParams, as same-origin policies
-  forbid reading GET parameters otherwise.
+  expect
+* HTML forms with `method="GET"` to local HTML files only work if the
+  receiving code uses URLSearchParams, as same-origin policies forbid
+  reading GET parameters otherwise
 * Opening links in a new tab won't work
 * Redirections won't work (yet)
 * Support of themes or extensions that require jQuery is wonky; fortunately
