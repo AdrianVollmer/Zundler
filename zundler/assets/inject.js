@@ -91,6 +91,10 @@ var fix_link = function(a) {
         a.addEventListener('click', virtual_click);
     } else if (a.getAttribute('href').startsWith('#')) {
         a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
+    } else {
+        // External links should open in a new tab. Browsers block links to
+        // sites of different origin within an iframe for security reasons.
+        a.setAttribute('target', "_blank");
     }
 };
 
