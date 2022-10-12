@@ -94,6 +94,7 @@ $(OUTPUT)/flask.html: Makefile
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
 	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt ; \
+	pip install -e $(DOWNLOAD)/$$NAME ; \
 	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
