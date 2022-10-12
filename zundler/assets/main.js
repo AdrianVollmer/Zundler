@@ -1,28 +1,5 @@
 const iFrameId = 'main';
 
-var _ArrayBufferToBase64 = function (array_buffer) {
-    var binary = '';
-    var bytes = new Uint8Array(array_buffer);
-    var len = bytes.byteLength;
-    for (var i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i])
-    }
-    return window.btoa(binary);
-};
-
-
-var _base64ToArrayBuffer = function (base64) {
-    if (!base64) { return []}
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-};
-
-
 var set_favicon = function(href) {
     if (!href) {return;}
     var favicon = document.createElement("link");
@@ -105,16 +82,7 @@ var normalize_path = function(path) {
 };
 
 
-
 window.onload = function() {
-    // Set up the virtual file tree
-    var FT = window.global_context.file_tree;
-    FT = _base64ToArrayBuffer(FT);
-    FT = pako.inflate(FT)
-    FT = new TextDecoder("utf-8").decode(FT);
-    FT = JSON.parse(FT);
-    window.global_context.file_tree = FT;
-
     // Set up message listener
     window.addEventListener("message", (evnt) => {
         console.log("Received message in parent", evnt);
@@ -174,4 +142,5 @@ var hide_loading_indictator = function() {
     loading.style.display = 'none';
 }
 
-//# init.js
+
+//# sourceURL=main.js

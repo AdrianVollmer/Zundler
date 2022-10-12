@@ -23,7 +23,7 @@ var embed_js = function() {
                 var src = newScript.getAttribute('src');
                 let [path, get_parameters, anchor] = split_url(src);
                 path = normalize_path(path);
-                var src = retrieve_file(path) + ' //# ' + path;
+                var src = retrieve_file(path) + ' //# sourceMap=' + path;
                 newScript.appendChild(document.createTextNode(src));
                 newScript.removeAttribute('src');
                 oldScript.parentNode.replaceChild(newScript, oldScript);
@@ -309,6 +309,3 @@ var on_load = function() {
 
 
 window.addEventListener('load', on_load);
-
-
-//# inject.js

@@ -33,11 +33,12 @@ def embed_assets(index_file, output_path=None):
 
     init_files = {}
     for filename in [
-        'init.js',
-        'inject.js',
         'init.css',
         'init.html',
-        'monkeypatch.js',
+        'bootstrap.js',
+        'main.js',
+        'inject_pre.js',
+        'inject_post.js',
         'pako.min.js',
         'LICENSE',
     ]:
@@ -56,14 +57,10 @@ def embed_assets(index_file, output_path=None):
 
     file_tree = load_filetree(
         base_dir,
-        before=init_files['monkeypatch.js'],
-        after=init_files['inject.js'],
+        before=init_files['inject_pre.js'],
+        after=init_files['inject_post.js'],
         exclude_pattern=new_base_name,
     )
-    file_tree = json.dumps(file_tree)
-    logger.debug('total asset size: %d' % len(file_tree))
-    file_tree = deflate(file_tree)
-    logger.debug('total asset size (compressed): %d' % len(file_tree))
 
     remote_resources = []
 
@@ -71,23 +68,28 @@ def embed_assets(index_file, output_path=None):
         'current_path': base_name,
         'file_tree': file_tree,
         'remote_resources': remote_resources,
+        'main': init_files['main.js'],
     }
+
     global_context = json.dumps(global_context)
+    logger.debug('total asset size: %d' % len(global_context))
+    global_context = deflate(global_context)
+    logger.debug('total asset size (compressed): %d' % len(global_context))
 
     result = """
 <!DOCTYPE html>
 <html>
 <head><style>{style}</style></head>
 <body>{body}
-<script>window.global_context = {global_context}</script>
+<script>window.global_context = "{global_context}"</script>
 <script>{pako} //# sourceURL=pako.js</script>
-<script>{init_js} //# sourceURL=init.js</script>
+<script>{bootstrap} //# sourceURL=boostrap.js</script>
 </body><!-- {license} --></html>
 """.format(
         style=init_files['init.css'],
-        init_js=init_files['init.js'],
-        pako=init_files['pako.min.js'],
         body=init_files['init.html'],
+        pako=init_files['pako.min.js'],
+        bootstrap=init_files['bootstrap.js'],
         global_context=global_context,
         license=init_files['LICENSE'],
     )
@@ -171,12 +173,12 @@ def embed_html_resources(html, base_dir, before, after):
 
     if head and before:
         script = soup.new_tag("script")
-        script.string = before
+        script.string = before + '//# sourceURL=inject_pre.js'
         head.insert(0, script)
 
     if body and after:
         script = soup.new_tag("script")
-        script.string = after
+        script.string = after + '//# sourceURL=inject_post.js'
         body.append(script)
 
     # TODO embed remote resources in case we want the entire file to be
