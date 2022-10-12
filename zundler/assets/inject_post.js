@@ -161,7 +161,12 @@ var retrieve_file = function(path) {
 };
 
 var normalize_path = function(path) {
-    // make relative paths absolute
+    // make relative paths absolute in context of our virtual file tree
+
+    while (path && path[0] == '/') {
+        path = path.substr(1);
+    }
+
     var result = window.global_context.current_path;
     result = result.split('/');
     result.pop();
