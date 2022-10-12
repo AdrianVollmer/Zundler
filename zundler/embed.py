@@ -29,7 +29,7 @@ SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 logger = logging.getLogger(__name__)
 
 
-def embed_assets(index_file, output_path=None):
+def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
 
     init_files = {}
     for filename in [
@@ -55,10 +55,12 @@ def embed_assets(index_file, output_path=None):
     if not output_path:
         output_path = os.path.join(base_dir, new_base_name)
 
+    before = init_files['inject_pre.js'] + append_pre
+    after = init_files['inject_post.js'] + append_post
     file_tree = load_filetree(
         base_dir,
-        before=init_files['inject_pre.js'],
-        after=init_files['inject_post.js'],
+        before=before,
+        after=after,
         exclude_pattern=new_base_name,
     )
 

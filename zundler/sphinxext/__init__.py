@@ -50,6 +50,8 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
             embed_assets(
                 input_path,
                 output_path=output_path,
+                append_pre=self.config.zundler_append_pre,
+                append_post=self.config.zundler_append_post,
             )
 
 
@@ -72,6 +74,18 @@ def setup(app):
     app.add_config_value(
         'zundler_root_doc',
         None,
+        '',
+    )
+
+    app.add_config_value(
+        'zundler_append_pre',
+        '',
+        '',
+    )
+
+    app.add_config_value(
+        'zundler_append_post',
+        '',
         '',
     )
 

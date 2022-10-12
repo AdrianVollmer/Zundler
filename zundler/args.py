@@ -26,6 +26,20 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '-P', '--append-pre',
+    default="",
+    help='append JS code to inject_pre script (default: %(default)s)',
+)
+
+
+parser.add_argument(
+    '-p', '--append-post',
+    default="",
+    help='append JS code to inject_post script (default: %(default)s)',
+)
+
+
+parser.add_argument(
     'input_path',
     help='input path to the root HTML file',
 )

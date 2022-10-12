@@ -6,6 +6,8 @@ def main():
     embed_assets(
         args.input_path,
         output_path=args.output_path,
+        append_pre=args.append_pre,
+        append_post=args.append_post,
     )
 
 
