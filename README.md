@@ -62,7 +62,12 @@ Installation
 Zundler is a Python package and can be installed like any other Python
 package.
 
-The recommended way is to clone this repository and type `pip install .`.
+The recommended way is to run this:
+
+```shell-session
+$ pip install git+https://github.com/AdrianVollmer/Zundler@main
+```
+
 If you prefer an alternative like `pipx`, `poetry` or manually handled
 `venv`s, you probably know what to do.
 
