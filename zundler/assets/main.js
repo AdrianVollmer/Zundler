@@ -38,6 +38,12 @@ var load_virtual_page = (function (path, get_params, anchor) {
     const file = window.global_context.file_tree[path];
     var iframe = createIframe();
 
+    if (!file) {
+        console.error("File not found:", path, get_params, anchor);
+        return false;
+    }
+
+
     const data = file.data;
     window.global_context.get_parameters = get_params;
     if (file.mime_type == 'text/html') {

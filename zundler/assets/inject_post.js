@@ -91,7 +91,7 @@ var fix_link = function(a) {
         a.addEventListener('click', virtual_click);
     } else if (a.getAttribute('href').startsWith('#')) {
         a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
-    } else {
+    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
         // External links should open in a new tab. Browsers block links to
         // sites of different origin within an iframe for security reasons.
         a.setAttribute('target', "_blank");
@@ -144,6 +144,7 @@ var is_virtual = function(url) {
         _url.startsWith('https://') ||
         _url.startsWith('http://') ||
         _url.startsWith('data:') ||
+        _url.startsWith('about:srcdoc') ||
         _url.startsWith('blob:')
     ));
 };
