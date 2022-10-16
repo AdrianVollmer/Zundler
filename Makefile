@@ -113,6 +113,20 @@ $(OUTPUT)/setuptools.html: Makefile
 	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
 
 
+readthedocs: $(OUTPUT)/readthedocs.html
+
+
+$(OUTPUT)/readthedocs.html: Makefile
+	$(call prepare,readthedocs,readthedocs.org)
+	NAME=readthedocs.org ; \
+	DOCS=docs ; \
+	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
+	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
+	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
+	sphinx-build -b zundler . _build/zundler && \
+	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
+
+
 clean:
 	@rm -rf $(DOWNLOAD)
 
