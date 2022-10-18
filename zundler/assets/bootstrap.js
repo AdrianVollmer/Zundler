@@ -18,5 +18,3 @@ GC = new TextDecoder("utf-8").decode(GC);
 GC = JSON.parse(GC);
 window.global_context = GC;
 eval(window.global_context.main);
-
-//# sourceURL=bootstrap.js
