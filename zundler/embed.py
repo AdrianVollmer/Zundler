@@ -120,7 +120,7 @@ def prepare_file(filename, before, after):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, 'rb').read()
-    mime_type = mime_type_from_bytes(data)
+    mime_type = mime_type_from_bytes(filename, data)
     base64encoded = False
 
     if ext == 'css':
@@ -260,7 +260,7 @@ def embed_css_resources(css, filename):
             mime_type = 'text/css'
             content = embed_css_resources(content, filename)
         else:
-            mime_type = mime_type_from_bytes(content)
+            mime_type = mime_type_from_bytes(filename, content)
         if not mime_type:
             logger.error('Unable to determine mime type: %s' % path)
             mime_type = 'application/octet-stream'
@@ -278,14 +278,28 @@ def embed_css_resources(css, filename):
     return css
 
 
-def mime_type_from_bytes(buffer):
+def mime_type_from_bytes(filename, buffer):
     try:
         import magic
         mime_type = magic.Magic(mime=True).from_buffer(buffer)
     except Exception as e:
-        logger.error("Error while guessing mime type: " + str(buffer[:10]) + '...')
+        logger.error(
+            "Error while guessing mime type (%s): %s" %
+            (filename, str(buffer[:10]) + '...')
+        )
         logger.error(str(e))
-        return 'application/octet-stream'
+
+        # Fall back to builtin; can happen if libmagic1 is missing
+        import mimetypes
+        mime_type = mimetypes.guess_type(filename)[0]
+
+    if not mime_type:
+        logger.error(
+            "Unknown mime type (%s): %s" %
+            (filename, str(buffer[:10]) + '...')
+        )
+        mime_type = 'application/octet-stream'
+
     return mime_type
 
 
