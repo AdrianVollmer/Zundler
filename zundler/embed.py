@@ -25,6 +25,15 @@ from pathlib import Path
 import re
 import zlib
 
+try:
+    import magic
+except ImportError as e:
+    logger = logging.getLogger(__name__)
+    logger.error(str(e))
+    logger.warning("Using `mimetypes` instead of `python-magic` for mime type guessing")
+    import mimetypes
+
+
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 logger = logging.getLogger(__name__)
@@ -280,17 +289,8 @@ def embed_css_resources(css, filename):
 
 def mime_type_from_bytes(filename, buffer):
     try:
-        import magic
         mime_type = magic.Magic(mime=True).from_buffer(buffer)
-    except Exception as e:
-        logger.error(
-            "Error while guessing mime type (%s): %s" %
-            (filename, str(buffer[:10]) + '...')
-        )
-        logger.error(str(e))
-
-        # Fall back to builtin; can happen if libmagic1 is missing
-        import mimetypes
+    except NameError:
         mime_type = mimetypes.guess_type(filename)[0]
 
     if not mime_type:
