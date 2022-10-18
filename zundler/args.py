@@ -26,6 +26,14 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '-R', '--revert',
+    default=False,
+    action='store_true',
+    help='set this flag for the reverse operation: deflate a Zundler file'
+         ' into its components (ouput_path must be a directory; "." by default)',
+)
+
+parser.add_argument(
     '-P', '--append-pre',
     default="",
     help='append JS code to inject_pre script (default: %(default)s)',
