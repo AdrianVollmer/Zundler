@@ -84,8 +84,24 @@ builder. The builder is a thin wrapper around the HTML builder, which runs
 there is a suitable Makefile, with `make zundler`.
 
 Jupyter-Books can be built with `jupyter-book build --custom-builder
-zundler`. You may have to add a render priority for Zundler like
-[here](https://jupyterbook.org/en/stable/content/code-outputs.html#render-priority).
+zundler --builder custom .`. You may have to add a render priority for Zundler like
+[here](https://jupyterbook.org/en/stable/content/code-outputs.html#render-priority):
+
+```yaml
+sphinx:
+  config:
+    nb_mime_priority_overrides: [
+      ["zundler", "application/vnd.jupyter.widget-view+json", 10],
+      ["zundler", "application/javascript", 20],
+      ["zundler", "text/html", 30],
+      ["zundler", "image/svg+xml", 40],
+      ["zundler", "image/png", 50],
+      ["zundler", "image/jpeg", 60],
+      ["zundler", "text/markdown", 70],
+      ["zundler", "text/latex", 80],
+      ["zundler", "text/plain", 90]
+    ]
+```
 
 Demos
 -----
