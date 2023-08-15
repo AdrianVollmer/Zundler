@@ -2,5 +2,5 @@ sphinx
 sphinx-design
 sphinx-book-theme
 pydata-sphinx-theme
-myst-parser
+myst-parser[linkify]
 sphinx-tabs
