@@ -1,0 +1,4 @@
+graft zundler
+global-exclude *.py[cod]
+prune .*
+exclude .*
