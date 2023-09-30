@@ -67,8 +67,12 @@ def setup(app):
         'doctree',
     )
     app.original_outdir = app.outdir
-    app.outdir = outdir
-    app.doctreedir = doctreedir
+
+    # Preserve types of app.outdir and app.doctreedir.
+    # Sphinx changed the types from str to Path around v7.2.
+    # This way it should be compatible with either way.
+    app.outdir = type(app.outdir)(outdir)
+    app.doctreedir = type(app.doctreedir)(doctreedir)
     Path(app.outdir).mkdir(parents=True, exist_ok=True)
 
     app.add_config_value(
