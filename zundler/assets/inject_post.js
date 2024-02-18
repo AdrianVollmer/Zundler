@@ -1,41 +1,3 @@
-var embed_css = function() {
-    Array.from(document.querySelectorAll("link")).forEach( link => {
-        if (link.getAttribute('rel') == 'stylesheet') {
-            const style = document.createElement("style");
-            var href = link.getAttribute('href');
-            let [path, get_parameters, anchor] = split_url(href);
-            path = normalize_path(path);
-            style.innerText = retrieve_file(path);
-            link.replaceWith(style);
-        };
-    });
-};
-
-
-var embed_js = function() {
-    Array.from(document.querySelectorAll("script")).forEach( oldScript => {
-        const newScript = document.createElement("script");
-        Array.from(oldScript.attributes).forEach( attr => {
-            newScript.setAttribute(attr.name, attr.value);
-        });
-        try {
-            if (newScript.hasAttribute('src') && is_virtual(newScript.getAttribute('src'))) {
-                var src = newScript.getAttribute('src');
-                let [path, get_parameters, anchor] = split_url(src);
-                path = normalize_path(path);
-                var src = retrieve_file(path) + ' //# sourceMap=' + path;
-                newScript.appendChild(document.createTextNode(src));
-                newScript.removeAttribute('src');
-                oldScript.parentNode.replaceChild(newScript, oldScript);
-            }
-        } catch (e) {
-            // Make sure all scripts are loaded
-            console.error("Caught error in " + oldScript.getAttribute("src"), e);
-        }
-    });
-};
-
-
 var split_url = function(url) {
     // Return a list of three elements: path, GET parameters, anchor
     var anchor = url.split('#')[1] || "";
@@ -78,61 +40,6 @@ var virtual_click = function(evnt) {
     evnt.preventDefault();
     evnt.stopPropagation();
     return false;
-};
-
-var fix_links = function() {
-    Array.from(document.querySelectorAll("a")).forEach( a => {
-        fix_link(a);
-    });
-};
-
-var fix_link = function(a) {
-    if (is_virtual(a.getAttribute('href'))) {
-        a.addEventListener('click', virtual_click);
-    } else if (a.getAttribute('href').startsWith('#')) {
-        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
-    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
-        // External links should open in a new tab. Browsers block links to
-        // sites of different origin within an iframe for security reasons.
-        a.setAttribute('target', "_blank");
-    }
-};
-
-var fix_form = function(form) {
-    var href = form.getAttribute('action');
-    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-        form.addEventListener('submit', virtual_click);
-    }
-};
-
-
-var fix_forms = function() {
-    Array.from(document.querySelectorAll("form")).forEach( form => {
-        fix_form(form);
-    });
-};
-
-
-var embed_img = function(img) {
-    if (img.hasAttribute('src')) {
-        const src = img.getAttribute('src');
-        if (is_virtual(src)) {
-            var path = normalize_path(src);
-            const file = retrieve_file(path);
-            const mime_type = window.global_context.file_tree[path].mime_type;
-            if (mime_type == 'image/svg+xml') {
-                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
-            } else {
-                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
-            }
-        };
-    };
-};
-
-var embed_imgs = function() {
-    Array.from(document.querySelectorAll("img")).forEach( img => {
-        embed_img(img);
-    });
 };
 
 var is_virtual = function(url) {
@@ -192,22 +99,11 @@ var normalize_path = function(path) {
 };
 
 
-var fix_document = function() {
-    embed_js(); // This might change the DOM, so do this first
-    monkey_patch();
-    embed_css();
-    embed_imgs();
-    fix_links();
-    fix_forms();
-};
-
-
 var on_set_data = function(argument) {
     window.global_context = argument;
     console.log("Received data from parent", window.global_context);
-    // dynamically fix elements on this page
     try {
-        fix_document();
+        monkey_patch();
         // Trigger DOMContentLoaded again, some scripts that have just
         // been executed expect it.
         window.document.dispatchEvent(new Event("DOMContentLoaded", {

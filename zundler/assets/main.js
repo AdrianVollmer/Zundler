@@ -31,6 +31,154 @@ var createIframe = function() {
     return iframe;
 }
 
+var retrieve_file = function(path) {
+    // console.log("Retrieving file: " + path);
+    var file_tree = window.global_context.file_tree;
+    var file = file_tree[path];
+    if (!file) {
+        console.warn("File not found: " + path);
+        return "";
+    } else {
+        return file.data;
+    }
+};
+
+var is_virtual = function(url) {
+    // Return true if the url should be retrieved from the virtual file tree
+    var _url = url.toString().toLowerCase();
+    return (! (
+        _url == "" ||
+        _url[0] == "#" ||
+        _url.startsWith('https://') ||
+        _url.startsWith('http://') ||
+        _url.startsWith('data:') ||
+        _url.startsWith('about:srcdoc') ||
+        _url.startsWith('blob:')
+    ));
+};
+
+var split_url = function(url) {
+    // Return a list of three elements: path, GET parameters, anchor
+    var anchor = url.split('#')[1] || "";
+    var get_parameters = url.split('#')[0].split('?')[1] || "";
+    var path = url.split('#')[0];
+    path = path.split('?')[0];
+    let result = [path, get_parameters, anchor];
+    // console.log("Split URL", url, result);
+    return result;
+};
+
+var prepare = function(html) {
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, "text/html");
+    embed_js(doc);
+    embed_css(doc);
+    embed_imgs(doc);
+    fix_links(doc);
+    fix_forms(doc);
+    return doc.documentElement.outerHTML;
+}
+
+var embed_js = function(doc) {
+    Array.from(doc.querySelectorAll("script")).forEach( oldScript => {
+        const newScript = doc.createElement("script");
+        Array.from(oldScript.attributes).forEach( attr => {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+        try {
+            if (newScript.hasAttribute('src') && is_virtual(newScript.getAttribute('src'))) {
+                var src = newScript.getAttribute('src');
+                let [path, get_parameters, anchor] = split_url(src);
+                path = normalize_path(path);
+                console.debug("Embed script: " + path);
+                var src = retrieve_file(path) + ' //# sourceMap=' + path;
+                newScript.appendChild(doc.createTextNode(src));
+                newScript.removeAttribute('src');
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            }
+        } catch (e) {
+            // Make sure all scripts are loaded
+            console.error("Caught error in " + oldScript.getAttribute("src"), e);
+        }
+    });
+}
+
+
+var embed_css = function(doc) {
+    Array.from(doc.querySelectorAll("link")).forEach( link => {
+        if (link.getAttribute('rel') == 'stylesheet') {
+            const style = doc.createElement("style");
+            var href = link.getAttribute('href');
+            let [path, get_parameters, anchor] = split_url(href);
+            path = normalize_path(path);
+            style.innerText = retrieve_file(path);
+            link.replaceWith(style);
+        };
+    });
+};
+
+
+var fix_links = function(doc) {
+    Array.from(doc.querySelectorAll("a")).forEach( a => {
+        fix_link(a);
+    });
+};
+
+
+var fix_link = function(a) {
+    if (is_virtual(a.getAttribute('href'))) {
+        // a.addEventListener('click', virtual_click);
+        a.setAttribute("onclick", "virtual_click(event)");
+    } else if (a.getAttribute('href').startsWith('#')) {
+        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
+    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
+        // External links should open in a new tab. Browsers block links to
+        // sites of different origin within an iframe for security reasons.
+        a.setAttribute('target', "_blank");
+    }
+};
+
+
+var fix_form = function(form) {
+    var href = form.getAttribute('action');
+    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+        // form.addEventListener('submit', virtual_click);
+        form.setAttribute("onsubmit", "virtual_click(event)");
+    }
+};
+
+
+var fix_forms = function(doc) {
+    Array.from(doc.querySelectorAll("form")).forEach( form => {
+        fix_form(form);
+    });
+};
+
+
+var embed_img = function(img) {
+    if (img.hasAttribute('src')) {
+        const src = img.getAttribute('src');
+        if (is_virtual(src)) {
+            var path = normalize_path(src);
+            const file = retrieve_file(path);
+            const mime_type = window.global_context.file_tree[path].mime_type;
+            if (mime_type == 'image/svg+xml') {
+                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
+            } else {
+                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
+            }
+        };
+    };
+};
+
+
+var embed_imgs = function(doc) {
+    Array.from(doc.querySelectorAll("img")).forEach( img => {
+        embed_img(img);
+    });
+};
+
+
 var load_virtual_page = (function (path, get_params, anchor) {
     // fill the iframe with the new page
     // return True if it worked
@@ -43,11 +191,12 @@ var load_virtual_page = (function (path, get_params, anchor) {
         return false;
     }
 
-
     const data = file.data;
     window.global_context.get_parameters = get_params;
+
     if (file.mime_type == 'text/html') {
-        iframe.setAttribute("srcdoc", data);
+        const html = prepare(data);
+        iframe.setAttribute("srcdoc", html);
         window.global_context.current_path = path;
         window.global_context.anchor = anchor;
         window.history.pushState({path, get_params, anchor}, '', '#');
@@ -147,6 +296,5 @@ var hide_loading_indictator = function() {
     var loading = document.getElementById('loading-indicator');
     loading.style.display = 'none';
 }
-
 
 //# sourceURL=main.js
