@@ -27,7 +27,7 @@ var createIframe = function() {
     iframe.setAttribute('src', '#');
     iframe.setAttribute('name', iFrameId);
     iframe.setAttribute('id', iFrameId);
-    iframe.style.display = 'none';
+    // iframe.style.display = 'none';
     return iframe;
 }
 
