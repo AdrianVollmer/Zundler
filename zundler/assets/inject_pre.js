@@ -30,10 +30,20 @@ var myGet = function (arg) {
     }
 };
 
+var myDelete = function (arg) {};
+
 URLSearchParams.prototype.get = myGet;
+URLSearchParams.prototype.delete = myDelete;
 
 /*
- * Monkeypatch fetch
+ * Monkeypatch window.history
+ */
+
+var myReplaceState = function (arg1, arg2, arg3) {};
+window.history.replaceState = myReplaceState;
+
+/*
+ * Monkeypatch window.fetch
  */
 
 const { fetch: originalFetch } = window;
