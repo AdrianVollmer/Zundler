@@ -120,6 +120,46 @@ var on_set_data = function(argument) {
 }
 
 
+var fix_link = function(a) {
+    if (is_virtual(a.getAttribute('href'))) {
+        // a.addEventListener('click', virtual_click);
+        a.setAttribute("onclick", "virtual_click(event)");
+    } else if (a.getAttribute('href').startsWith('#')) {
+        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
+    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
+        // External links should open in a new tab. Browsers block links to
+        // sites of different origin within an iframe for security reasons.
+        a.setAttribute('target', "_blank");
+    }
+};
+
+
+var fix_form = function(form) {
+    var href = form.getAttribute('action');
+    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+        // form.addEventListener('submit', virtual_click);
+        form.setAttribute("onsubmit", "virtual_click(event)");
+    }
+};
+
+
+var embed_img = function(img) {
+    if (img.hasAttribute('src')) {
+        const src = img.getAttribute('src');
+        if (is_virtual(src)) {
+            var path = normalize_path(src);
+            const file = retrieve_file(path);
+            const mime_type = window.global_context.file_tree[path].mime_type;
+            if (mime_type == 'image/svg+xml') {
+                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
+            } else {
+                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
+            }
+        };
+    };
+};
+
+
 var on_scroll_to_anchor = function(argument) {
     if (window.global_context.anchor) {
         document.location.replace("about:srcdoc#" + window.global_context.anchor);
