@@ -3,7 +3,7 @@ Zundler
 
 Bundle assets of distributed HTML docs into one self-contained HTML file.
 
-> **Warning**
+> [!WARNING]
 > This is still experimental. Expect breakages! Feel free
 > to open an issue. Please provide everything that is necessary to reproduce
 > the problem.
