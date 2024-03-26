@@ -111,7 +111,7 @@ var embed_css = function(doc) {
             var href = link.getAttribute('href');
             let [path, get_parameters, anchor] = split_url(href);
             path = normalize_path(path);
-            style.innerText = retrieve_file(path);
+            style.textContent = retrieve_file(path);
             link.replaceWith(style);
         };
     });
