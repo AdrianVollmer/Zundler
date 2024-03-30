@@ -55,3 +55,17 @@ follow_imports = "skip"
 incremental = true
 check_untyped_defs = true
 warn_unused_ignores = true
+
+[project.optional-dependencies]
+tests = [
+    'pytest>=8',
+    'selenium',
+    'pytest-selenium',
+]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = [
+    "tests",
+]
