@@ -8,12 +8,12 @@ from sphinx.util import logging, progress_message
 from sphinx.util.osutil import relpath
 
 
-__ = get_translation(__name__, 'console')
+__ = get_translation(__name__, "console")
 logger = logging.getLogger(__name__)
 
 
 class ZundlerBuilder(StandaloneHTMLBuilder):
-    name = 'zundler'
+    name = "zundler"
     epilog = ""
 
     def __init__(self, app, env=None):
@@ -22,9 +22,8 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
         else:
             super().__init__(app)
 
-        self.epilog = (
-            'Your self-contained HTML file is now in %s.' %
-            relpath(self.app.original_outdir)
+        self.epilog = "Your self-contained HTML file is now in %s." % relpath(
+            self.app.original_outdir
         )
 
     def finish(self):
@@ -38,15 +37,15 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
 
         input_path = os.path.join(
             self.outdir,
-            root_doc + '.html',
+            root_doc + ".html",
         )
 
         output_path = os.path.join(
             self.app.original_outdir,
-            root_doc + '.html',
+            root_doc + ".html",
         )
 
-        with progress_message(__('embedding HTML assets')):
+        with progress_message(__("embedding HTML assets")):
             embed_assets(
                 input_path,
                 output_path=output_path,
@@ -60,11 +59,11 @@ def setup(app):
     # then $builddir/$target second.
     outdir = os.path.join(
         os.path.dirname(app.outdir),
-        'html',
+        "html",
     )
     doctreedir = os.path.join(
         os.path.dirname(app.outdir),
-        'doctree',
+        "doctree",
     )
     app.original_outdir = app.outdir
 
@@ -76,27 +75,27 @@ def setup(app):
     Path(app.outdir).mkdir(parents=True, exist_ok=True)
 
     app.add_config_value(
-        'zundler_root_doc',
+        "zundler_root_doc",
         None,
-        '',
+        "",
     )
 
     app.add_config_value(
-        'zundler_append_pre',
-        '',
-        '',
+        "zundler_append_pre",
+        "",
+        "",
     )
 
     app.add_config_value(
-        'zundler_append_post',
-        '',
-        '',
+        "zundler_append_post",
+        "",
+        "",
     )
 
     app.add_builder(ZundlerBuilder)
 
     return {
-       'version': '0.1',
-       'parallel_read_safe': True,
-       'parallel_write_safe': True,
+        "version": "0.1",
+        "parallel_read_safe": True,
+        "parallel_write_safe": True,
     }

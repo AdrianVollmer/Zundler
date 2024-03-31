@@ -10,7 +10,9 @@ except ImportError:
 try:
     __version__ = importlib_metadata.version(__package__ or __name__)
     #  __summary__ = importlib_metadata.metadata(__package__ or __name__)['summary']
-    __summary__ = "Bundle assets of distributed HTML docs into one self-contained HTML file"
+    __summary__ = (
+        "Bundle assets of distributed HTML docs into one self-contained HTML file"
+    )
 except importlib_metadata.PackageNotFoundError:
     __version__ = "??"
     __summary__ = "??"
@@ -21,40 +23,46 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
-    '-v', '--version', action='version',
+    "-v",
+    "--version",
+    action="version",
     version=__version__,
 )
 
 parser.add_argument(
-    '-R', '--revert',
+    "-R",
+    "--revert",
     default=False,
-    action='store_true',
-    help='set this flag for the reverse operation: deflate a Zundler file'
-         ' into its components (ouput_path must be a directory; "." by default)',
+    action="store_true",
+    help="set this flag for the reverse operation: deflate a Zundler file"
+    ' into its components (ouput_path must be a directory; "." by default)',
 )
 
 parser.add_argument(
-    '-P', '--append-pre',
+    "-P",
+    "--append-pre",
     default="",
-    help='append JS code to inject_pre script (default: %(default)s)',
+    help="append JS code to inject_pre script (default: %(default)s)",
 )
 
 
 parser.add_argument(
-    '-p', '--append-post',
+    "-p",
+    "--append-post",
     default="",
-    help='append JS code to inject_post script (default: %(default)s)',
+    help="append JS code to inject_post script (default: %(default)s)",
 )
 
 
 parser.add_argument(
-    'input_path',
-    help='input path to the root HTML file',
+    "input_path",
+    help="input path to the root HTML file",
 )
 
 parser.add_argument(
-    '-o', '--output-path',
-    help='output path to resulting HTML file',
+    "-o",
+    "--output-path",
+    help="output path to resulting HTML file",
 )
 
 

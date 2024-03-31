@@ -1,8 +1,10 @@
 def main():
     from .args import parse_args
+
     args = parse_args()
 
     from .embed import embed_assets, extract_assets
+
     if args.revert:
         extract_assets(
             args.input_path,
