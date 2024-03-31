@@ -61,6 +61,7 @@ tests = [
     'pytest>=8',
     'selenium',
     'pytest-selenium',
+    'black',
 ]
 
 [tool.pytest.ini_options]
