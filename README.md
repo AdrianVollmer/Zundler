@@ -2,6 +2,7 @@ Zundler
 =======
 
 Bundle assets of distributed HTML docs into one self-contained HTML file.
+It's built with Sphinx in mind, but can be used on all HTML docs.
 
 > [!WARNING]
 > This is still experimental. Expect breakages! Feel free
