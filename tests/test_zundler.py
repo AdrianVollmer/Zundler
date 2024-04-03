@@ -63,7 +63,9 @@ def test_multi_page(selenium):
 
     selenium.switch_to.frame("main")
 
-    second_link = selenium.find_element(By.XPATH, "//a[text() = 'Second' and @class = 'reference internal']")
+    second_link = selenium.find_element(
+        By.XPATH, "//a[text() = 'Second' and @class = 'reference internal']"
+    )
 
     second_link.click()
 

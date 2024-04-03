@@ -1,4 +1,5 @@
 from sphinx.application import Sphinx
+
 # Configuration file for the Sphinx documentation builder.
 #
 # For the full list of built-in configuration values, see the documentation:
@@ -7,16 +8,16 @@ from sphinx.application import Sphinx
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'demo001'
-copyright = '2022, Adrian Vollmer'
-author = 'Adrian Vollmer'
-version = '0.0.1'
+project = "demo001"
+copyright = "2022, Adrian Vollmer"
+author = "Adrian Vollmer"
+version = "0.0.1"
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-templates_path = ['_templates']
-exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+templates_path = ["_templates"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
