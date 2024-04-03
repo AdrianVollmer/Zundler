@@ -26,6 +26,7 @@ def run_make_commands(request):
     uv venv && \\
     . .venv/bin/activate && \\
     uv pip install -r requirements.txt && \\
+    rm -rf _build && \\
     .venv/bin/sphinx-build -M zundler . _build
 """
 
