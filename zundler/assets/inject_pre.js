@@ -17,6 +17,7 @@ var myGet = function (arg) {
     const originalResult = originalGet.apply(this, [arg]);
     // If searchtools.js of sphinx is used
     if (
+        window.global_context &&
         window.global_context.get_parameters &&
         (window.location.search === "") &&
         (Array.from(this.entries()).length == 0)
