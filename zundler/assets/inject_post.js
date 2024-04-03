@@ -101,15 +101,9 @@ var normalize_path = function(path) {
 
 var on_set_data = function(argument) {
     window.global_context = argument;
-    console.log("Received data from parent", window.global_context);
+    console.debug("Received data from parent", window.global_context);
     try {
         monkey_patch();
-        // Trigger DOMContentLoaded again, some scripts that have just
-        // been executed expect it.
-        window.document.dispatchEvent(new Event("DOMContentLoaded", {
-            bubbles: true,
-            cancelable: true
-        }));
     } finally {
         observer.observe(window.document.body, {subtree: true, childList: true});
         window.parent.postMessage({

@@ -17,10 +17,8 @@ def test_copy_button(selenium):
     assert "copy-button documentation" in selenium.title
 
     selenium.switch_to.frame("main")
-    # Not sure why there are two buttons, but we need the second one.
-    # The first cannot be clicked by selenium because it's obscured.
 
-    button = selenium.find_element(By.CSS_SELECTOR, "button.copybtn + button.copybtn")
+    button = selenium.find_element(By.CSS_SELECTOR, "button.copybtn")
 
     assert button.get_attribute("data-tooltip") == "Copy"
     assert "success" not in button.get_attribute("class")
