@@ -93,8 +93,8 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
 <head><style>{style}</style></head>
 <body>{body}
 <script>window.global_context = "{global_context}"</script>
-<script>{pako} //# sourceURL=pako.js</script>
-<script>{bootstrap} //# sourceURL=boostrap.js</script>
+<script>{pako} \n//# sourceURL=pako.js</script>
+<script>{bootstrap} \n//# sourceURL=boostrap.js</script>
 </body><!-- {license} --></html>
 """.format(
         style=init_files["init.css"],
@@ -193,12 +193,12 @@ def embed_html_resources(html, base_dir, before, after):
 
     if head and before:
         script = soup.new_tag("script")
-        script.string = before + "//# sourceURL=inject_pre.js"
+        script.string = before + "\n//# sourceURL=inject_pre.js"
         head.insert(0, script)
 
     if body and after:
         script = soup.new_tag("script")
-        script.string = after + "//# sourceURL=inject_post.js"
+        script.string = after + "\n//# sourceURL=inject_post.js"
         body.append(script)
 
     # TODO embed remote resources in case we want the entire file to be

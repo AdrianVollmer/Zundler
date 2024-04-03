@@ -91,7 +91,7 @@ var embed_js = function(doc) {
                 let [path, get_parameters, anchor] = split_url(src);
                 path = normalize_path(path);
                 console.debug("Embed script: " + path);
-                var src = retrieve_file(path) + ' //# sourceMap=' + path;
+                var src = retrieve_file(path) + ' \n//# sourceURL=' + path;
                 newScript.appendChild(doc.createTextNode(src));
                 newScript.removeAttribute('src');
                 oldScript.parentNode.replaceChild(newScript, oldScript);
