@@ -145,9 +145,10 @@ def prepare_file(filename, before, after):
         "ttf",
         "gif",
         "ico",
+        "wasm",
     ]:
         # JSON doesn't allow binary data
-        data = base64.b64encode(data)
+        data = base64.b64encode(data).decode()
         base64encoded = True
 
     elif ext in ["html", "htm"]:
@@ -163,6 +164,7 @@ def prepare_file(filename, before, after):
             data = data.decode()
         except UnicodeError:
             data = base64.b64encode(data).decode()
+            base64encoded = True
 
     logger.debug("loaded file: %s [%s, %d bytes]" % (filename, mime_type, len(data)))
 

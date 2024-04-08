@@ -64,7 +64,7 @@ var retrieve_file = function(path) {
         console.warn("File not found: " + path);
         return "";
     } else {
-        return file.data;
+        return file;
     }
 };
 

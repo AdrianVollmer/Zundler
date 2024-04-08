@@ -49,14 +49,55 @@ window.history.replaceState = myReplaceState;
 
 const { fetch: originalFetch } = window;
 
+async function waitFor(predicate, timeout) {
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      console.log('checking', predicate());
+      if (!predicate()) return;
+      clearInterval(interval);
+      resolve();
+    };
+    const interval = setInterval(check, 100);
+    check();
+
+    if (!timeout) return;
+    setTimeout(() => {
+      clearInterval(interval);
+      reject();
+    }, timeout);
+  });
+}
+
+var _base64ToArrayBuffer = function (base64) {
+    if (!base64) { return []}
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+};
+
 window.fetch = async (...args) => {
+    // wait until global_context is ready
+    try {
+        await waitFor(() => window.hasOwnProperty("global_context"), 10000);
+    } catch (err) {
+        throw err;
+    }
+
     let [resource, config ] = args;
     var path = normalize_path(resource);
     var response;
     if (is_virtual(path)) {
-        var data = retrieve_file(path);
+        var file = retrieve_file(path);
+        var data = file.data;
+        if (file.base64encoded) {
+            data = _base64ToArrayBuffer(data);
+        }
         response = new Response(data);
-
+        response.headers.set("content-type", file.mime_type);
     } else {
         response = await originalFetch(resource, config);
     }

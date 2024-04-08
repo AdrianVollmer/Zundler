@@ -39,7 +39,7 @@ var retrieve_file = function(path) {
         console.warn("File not found: " + path);
         return "";
     } else {
-        return file.data;
+        return file;
     }
 };
 
@@ -91,7 +91,7 @@ var embed_js = function(doc) {
                 let [path, get_parameters, anchor] = split_url(src);
                 path = normalize_path(path);
                 console.debug("Embed script: " + path);
-                var src = retrieve_file(path) + ' \n//# sourceURL=' + path;
+                var src = retrieve_file(path).data + ' \n//# sourceURL=' + path;
                 newScript.appendChild(doc.createTextNode(src));
                 newScript.removeAttribute('src');
                 oldScript.parentNode.replaceChild(newScript, oldScript);
@@ -111,7 +111,7 @@ var embed_css = function(doc) {
             var href = link.getAttribute('href');
             let [path, get_parameters, anchor] = split_url(href);
             path = normalize_path(path);
-            style.textContent = retrieve_file(path);
+            style.textContent = retrieve_file(path).data;
             link.replaceWith(style);
         };
     });
@@ -161,11 +161,11 @@ var embed_img = function(img) {
         if (is_virtual(src)) {
             var path = normalize_path(src);
             const file = retrieve_file(path);
-            const mime_type = window.global_context.file_tree[path].mime_type;
+            const mime_type = file.mime_type;
             if (mime_type == 'image/svg+xml') {
-                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
+                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
             } else {
-                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
+                img.setAttribute('src', `data:${mime_type};base64, ${file.data}`);
             }
         };
     };
