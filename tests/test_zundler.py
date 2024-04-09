@@ -16,7 +16,7 @@ def test_copy_button(selenium):
 
     assert "copy-button documentation" in selenium.title
 
-    selenium.switch_to.frame("main")
+    selenium.switch_to.frame("zundler-iframe")
 
     button = selenium.find_element(By.CSS_SELECTOR, "button.copybtn")
 
@@ -41,7 +41,7 @@ def test_mermaid(selenium):
 
     assert "mermaid documentation" in selenium.title
 
-    selenium.switch_to.frame("main")
+    selenium.switch_to.frame("zundler-iframe")
 
     section = selenium.find_element(By.CSS_SELECTOR, "#section")
     svg = selenium.find_element(By.CSS_SELECTOR, "div.mermaid")
@@ -59,7 +59,7 @@ def test_multi_page(selenium):
 
     assert "multi-page documentation" in selenium.title
 
-    selenium.switch_to.frame("main")
+    selenium.switch_to.frame("zundler-iframe")
 
     second_link = selenium.find_element(
         By.XPATH, "//a[text() = 'Second' and @class = 'reference internal']"
@@ -80,14 +80,14 @@ def test_multi_page_search(selenium):
 
     assert "multi-page documentation" in selenium.title
 
-    selenium.switch_to.frame("main")
+    selenium.switch_to.frame("zundler-iframe")
 
     searchbox = selenium.find_element(By.CSS_SELECTOR, "#searchbox input[type='text']")
 
     searchbox.send_keys("Lorem" + Keys.ENTER)
     selenium.switch_to.parent_frame()
     time.sleep(2)
-    selenium.switch_to.frame("main")
+    selenium.switch_to.frame("zundler-iframe")
 
     assert selenium.title.startswith("Search")
 

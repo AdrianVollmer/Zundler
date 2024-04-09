@@ -1,4 +1,4 @@
-const iFrameId = 'main';
+const iFrameId = 'zundler-iframe';
 
 var set_favicon = function(href) {
     if (!href) {return;}
