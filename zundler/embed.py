@@ -33,6 +33,7 @@ except ImportError as e:
     logger.warning("Using `mimetypes` instead of `python-magic` for mime type guessing")
     import mimetypes
 
+from zundler.args import __version__
 
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -89,6 +90,11 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
 
     result = """
 <!DOCTYPE html>
+<!--
+This document has been prepared using Zundler {version}. You can use zundler to
+inspect the files embedded below: `zundler -R <file>`
+https://github.com/AdrianVollmer/Zundler
+-->
 <html>
 <head><style>{style}</style></head>
 <body>{body}
@@ -103,6 +109,7 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
         bootstrap=init_files["bootstrap.js"],
         global_context=global_context,
         license=init_files["LICENSE"],
+        version=__version__,
     )
 
     with open(output_path, "w") as fp:
