@@ -106,7 +106,7 @@ var embed_js = function(doc) {
 
 var embed_css = function(doc) {
     Array.from(doc.querySelectorAll("link")).forEach( link => {
-        if (link.getAttribute('rel') == 'stylesheet' && !link.getAttribute("href")) {
+        if (link.getAttribute('rel') == 'stylesheet' && link.getAttribute("href")) {
             const style = doc.createElement("style");
             var href = link.getAttribute('href');
             let [path, get_parameters, anchor] = split_url(href);
