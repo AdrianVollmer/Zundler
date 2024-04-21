@@ -11,10 +11,10 @@ var _base64ToArrayBuffer = function (base64) {
 
 
 // Set up the virtual file tree
-var GC = window.global_context;
+var GC = window.globalContext;
 GC = _base64ToArrayBuffer(GC);
 GC = pako.inflate(GC);
 GC = new TextDecoder("utf-8").decode(GC);
 GC = JSON.parse(GC);
-window.global_context = GC;
-eval(window.global_context.main);
+window.globalContext = GC;
+eval(window.globalContext.main);

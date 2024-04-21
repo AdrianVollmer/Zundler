@@ -1,11 +1,11 @@
 const iFrameId = 'zundler-iframe';
 
-var set_favicon = function(href) {
+var setFavicon = function(href) {
     if (!href) {return;}
     var favicon = document.createElement("link");
     favicon.setAttribute('rel', 'shortcut icon');
-    href = normalize_path(href);
-    const file = window.global_context.file_tree[href];
+    href = normalizePath(href);
+    const file = window.globalContext.fileTree[href];
     if (!file) {return;}
     if (file.mime_type == 'image/svg+xml') {
         favicon.setAttribute('href', 'data:' + file.mime_type + ';charset=utf-8;base64,' + btoa(file.data));
@@ -31,10 +31,10 @@ var createIframe = function() {
     return iframe;
 }
 
-var retrieve_file = function(path) {
+var retrieveFile = function(path) {
     // console.log("Retrieving file: " + path);
-    var file_tree = window.global_context.file_tree;
-    var file = file_tree[path];
+    var fileTree = window.globalContext.fileTree;
+    var file = fileTree[path];
     if (!file) {
         console.warn("File not found: " + path);
         return "";
@@ -43,7 +43,7 @@ var retrieve_file = function(path) {
     }
 };
 
-var is_virtual = function(url) {
+var isVirtual = function(url) {
     // Return true if the url should be retrieved from the virtual file tree
     var _url = url.toString().toLowerCase();
     return (! (
@@ -57,13 +57,13 @@ var is_virtual = function(url) {
     ));
 };
 
-var split_url = function(url) {
+var splitUrl = function(url) {
     // Return a list of three elements: path, GET parameters, anchor
     var anchor = url.split('#')[1] || "";
-    var get_parameters = url.split('#')[0].split('?')[1] || "";
+    var getParameters = url.split('#')[0].split('?')[1] || "";
     var path = url.split('#')[0];
     path = path.split('?')[0];
-    let result = [path, get_parameters, anchor];
+    let result = [path, getParameters, anchor];
     // console.log("Split URL", url, result);
     return result;
 };
@@ -83,7 +83,7 @@ var prepare = function(html) {
     // problematic characters: `, ", ', &, </script>, ...
     // atob is insufficient, because it only deals with ASCII - we have
     // unicode
-    var serializedGC = unicodeToBase64(JSON.stringify(window.global_context));
+    var serializedGC = unicodeToBase64(JSON.stringify(window.globalContext));
 
     scriptTag.textContent = `
         function base64ToUnicode(base64String) {
@@ -91,34 +91,34 @@ var prepare = function(html) {
             return decodeURIComponent(escape(utf8EncodedString));
         }
 
-        window.global_context = JSON.parse(base64ToUnicode("${serializedGC}"));
+        window.globalContext = JSON.parse(base64ToUnicode("${serializedGC}"));
     `;
 
     doc.head.prepend(scriptTag);
 
-    embed_js(doc);
-    embed_css(doc);
-    embed_imgs(doc);
+    embedJs(doc);
+    embedCss(doc);
+    embedImgs(doc);
 
-    fix_links(doc);
-    fix_forms(doc);
+    fixLinks(doc);
+    fixForms(doc);
 
     return doc.documentElement.outerHTML;
 }
 
-var embed_js = function(doc) {
+var embedJs = function(doc) {
     Array.from(doc.querySelectorAll("script")).forEach( oldScript => {
         const newScript = doc.createElement("script");
         Array.from(oldScript.attributes).forEach( attr => {
             newScript.setAttribute(attr.name, attr.value);
         });
         try {
-            if (newScript.hasAttribute('src') && is_virtual(newScript.getAttribute('src'))) {
+            if (newScript.hasAttribute('src') && isVirtual(newScript.getAttribute('src'))) {
                 var src = newScript.getAttribute('src');
-                let [path, get_parameters, anchor] = split_url(src);
-                path = normalize_path(path);
+                let [path, getParameters, anchor] = splitUrl(src);
+                path = normalizePath(path);
                 console.debug("Embed script: " + path);
-                var src = retrieve_file(path).data + ' \n//# sourceURL=' + path;
+                var src = retrieveFile(path).data + ' \n//# sourceURL=' + path;
                 newScript.appendChild(doc.createTextNode(src));
                 newScript.removeAttribute('src');
                 oldScript.parentNode.replaceChild(newScript, oldScript);
@@ -131,31 +131,31 @@ var embed_js = function(doc) {
 }
 
 
-var embed_css = function(doc) {
+var embedCss = function(doc) {
     Array.from(doc.querySelectorAll("link")).forEach( link => {
         if (link.getAttribute('rel') == 'stylesheet' && link.getAttribute("href")) {
             const style = doc.createElement("style");
             var href = link.getAttribute('href');
-            let [path, get_parameters, anchor] = split_url(href);
-            path = normalize_path(path);
-            style.textContent = retrieve_file(path).data;
+            let [path, getParameters, anchor] = splitUrl(href);
+            path = normalizePath(path);
+            style.textContent = retrieveFile(path).data;
             link.replaceWith(style);
         };
     });
 };
 
 
-var fix_links = function(doc) {
+var fixLinks = function(doc) {
     Array.from(doc.querySelectorAll("a")).forEach( a => {
-        fix_link(a);
+        fixLink(a);
     });
 };
 
 
-var fix_link = function(a) {
-    if (is_virtual(a.getAttribute('href'))) {
-        // a.addEventListener('click', virtual_click);
-        a.setAttribute("onclick", "virtual_click(event)");
+var fixLink = function(a) {
+    if (isVirtual(a.getAttribute('href'))) {
+        // a.addEventListener('click', virtualClick);
+        a.setAttribute("onclick", "virtualClick(event)");
     } else if (a.getAttribute('href').startsWith('#')) {
         a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
     } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
@@ -166,28 +166,28 @@ var fix_link = function(a) {
 };
 
 
-var fix_form = function(form) {
+var fixForm = function(form) {
     var href = form.getAttribute('action');
-    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-        // form.addEventListener('submit', virtual_click);
-        form.setAttribute("onsubmit", "virtual_click(event)");
+    if (isVirtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+        // form.addEventListener('submit', virtualClick);
+        form.setAttribute("onsubmit", "virtualClick(event)");
     }
 };
 
 
-var fix_forms = function(doc) {
+var fixForms = function(doc) {
     Array.from(doc.querySelectorAll("form")).forEach( form => {
-        fix_form(form);
+        fixForm(form);
     });
 };
 
 
-var embed_img = function(img) {
+var embedImg = function(img) {
     if (img.hasAttribute('src')) {
         const src = img.getAttribute('src');
-        if (is_virtual(src)) {
-            var path = normalize_path(src);
-            const file = retrieve_file(path);
+        if (isVirtual(src)) {
+            var path = normalizePath(src);
+            const file = retrieveFile(path);
             const mime_type = file.mime_type;
             if (mime_type == 'image/svg+xml') {
                 img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
@@ -199,18 +199,18 @@ var embed_img = function(img) {
 };
 
 
-var embed_imgs = function(doc) {
+var embedImgs = function(doc) {
     Array.from(doc.querySelectorAll("img")).forEach( img => {
-        embed_img(img);
+        embedImg(img);
     });
 };
 
 
-var load_virtual_page = (function (path, get_params, anchor) {
+var loadVirtualPage = (function (path, get_params, anchor) {
     // fill the iframe with the new page
     // return True if it worked
     // return False if loading indicator should be removed right away
-    const file = window.global_context.file_tree[path];
+    const file = window.globalContext.fileTree[path];
     var iframe = createIframe();
 
     if (!file) {
@@ -219,11 +219,11 @@ var load_virtual_page = (function (path, get_params, anchor) {
     }
 
     const data = file.data;
-    window.global_context.get_parameters = get_params;
+    window.globalContext.getParameters = get_params;
 
     if (file.mime_type == 'text/html') {
-        window.global_context.current_path = path;
-        window.global_context.anchor = anchor;
+        window.globalContext.current_path = path;
+        window.globalContext.anchor = anchor;
         const html = prepare(data);
         iframe.setAttribute("srcdoc", html);
         window.history.pushState({path, get_params, anchor}, '', '#');
@@ -237,10 +237,10 @@ var load_virtual_page = (function (path, get_params, anchor) {
 });
 
 
-var normalize_path = function(path) {
+var normalizePath = function(path) {
     // TODO remove redundant definition of this function (in inject.js)
     // make relative paths absolute
-    var result = window.global_context.current_path;
+    var result = window.globalContext.current_path;
     result = result.split('/');
     result.pop();
     result = result.concat(path.split('/'));
@@ -259,7 +259,7 @@ var normalize_path = function(path) {
     });
 
     result = array.join('/');
-    // console.log(`Normalized path: ${path} -> ${result} (@${window.global_context.current_path})`);
+    // console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
     return result;
 };
 
@@ -271,33 +271,33 @@ window.onload = function() {
         var iframe = document.getElementById(iFrameId);
 
         if (evnt.data.action == 'ready') {
-            // iframe is ready to receive the global_context
+            // iframe is ready to receive the globalContext
             iframe.contentWindow.postMessage({
                 action: "set_data",
-                argument: window.global_context,
+                argument: window.globalContext,
             }, "*");
 
         } else if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
-            // parent sets the title and responds with the global_context object
+            // parent sets the title and responds with the globalContext object
             window.document.title = evnt.data.argument.title;
-            set_favicon(evnt.data.argument.favicon);
+            setFavicon(evnt.data.argument.favicon);
 
-        } else if (evnt.data.action == 'virtual_click') {
+        } else if (evnt.data.action == 'virtualClick') {
             // user has clicked on a link in the iframe
-            show_loading_indictator();
-            var loaded = load_virtual_page(
+            showLoadingIndicator();
+            var loaded = loadVirtualPage(
                 evnt.data.argument.path,
-                evnt.data.argument.get_parameters,
+                evnt.data.argument.getParameters,
                 evnt.data.argument.anchor,
             );
             if (!loaded) {
-                hide_loading_indictator();
+                hideLoadingIndicator();
             }
 
         } else if (evnt.data.action == 'show_iframe') {
             // iframe finished fixing the document and is ready to be shown;
-            hide_loading_indictator();
+            hideLoadingIndicator();
             iframe.contentWindow.postMessage({
                 action: "scroll_to_anchor",
             }, "*");
@@ -306,15 +306,15 @@ window.onload = function() {
 
     // Set up history event listener
     window.addEventListener("popstate", (evnt) => {
-        load_virtual_page(evnt.state.path, evnt.state.get_params, evnt.state.anchor);
+        loadVirtualPage(evnt.state.path, evnt.state.get_params, evnt.state.anchor);
     });
 
     // Load first page
-    load_virtual_page(window.global_context.current_path, "", "");
+    loadVirtualPage(window.globalContext.current_path, "", "");
 }
 
 
-var show_loading_indictator = function() {
+var showLoadingIndicator = function() {
     var iframe = document.getElementById(iFrameId);
     iframe.remove()
     var loading = document.getElementById('loading-indicator');
@@ -322,7 +322,7 @@ var show_loading_indictator = function() {
 }
 
 
-var hide_loading_indictator = function() {
+var hideLoadingIndicator = function() {
     var iframe = document.getElementById(iFrameId);
     iframe.style.display = '';
     var loading = document.getElementById('loading-indicator');

@@ -1,16 +1,16 @@
-var split_url = function(url) {
+var splitUrl = function(url) {
     // Return a list of three elements: path, GET parameters, anchor
     var anchor = url.split('#')[1] || "";
-    var get_parameters = url.split('#')[0].split('?')[1] || "";
+    var getParameters = url.split('#')[0].split('?')[1] || "";
     var path = url.split('#')[0];
     path = path.split('?')[0];
-    let result = [path, get_parameters, anchor];
+    let result = [path, getParameters, anchor];
     // console.log("Split URL", url, result);
     return result;
 }
 
 
-var virtual_click = function(evnt) {
+var virtualClick = function(evnt) {
     // Handle GET parameters and anchors
     // console.log("Virtual click", evnt);
 
@@ -18,22 +18,22 @@ var virtual_click = function(evnt) {
     var name = el.tagName.toLowerCase();
 
     if (name == 'a') {
-        var [path, get_parameters, anchor] = split_url(el.getAttribute('href'));
+        var [path, getParameters, anchor] = splitUrl(el.getAttribute('href'));
     } else if (name == 'form') {
-        var [path, get_parameters, anchor] = split_url(el.getAttribute('action'));
+        var [path, getParameters, anchor] = splitUrl(el.getAttribute('action'));
         const formData = new FormData(el);
-        get_parameters = new URLSearchParams(formData).toString();
+        getParameters = new URLSearchParams(formData).toString();
     } else {
         console.error("Invalid element", el);
     }
 
-    path = normalize_path(path);
+    path = normalizePath(path);
 
     window.parent.postMessage({
-        action: "virtual_click",
+        action: "virtualClick",
         argument: {
             path: path,
-            get_parameters: get_parameters,
+            getParameters: getParameters,
             anchor: anchor,
         }
     }, '*');
@@ -42,7 +42,7 @@ var virtual_click = function(evnt) {
     return false;
 };
 
-var is_virtual = function(url) {
+var isVirtual = function(url) {
     // Return true if the url should be retrieved from the virtual file tree
     var _url = url.toString().toLowerCase();
     return (! (
@@ -56,10 +56,10 @@ var is_virtual = function(url) {
     ));
 };
 
-var retrieve_file = function(path) {
+var retrieveFile = function(path) {
     // console.log("Retrieving file: " + path);
-    var file_tree = window.global_context.file_tree;
-    var file = file_tree[path];
+    var fileTree = window.globalContext.fileTree;
+    var file = fileTree[path];
     if (!file) {
         console.warn("File not found: " + path);
         return "";
@@ -68,14 +68,14 @@ var retrieve_file = function(path) {
     }
 };
 
-var normalize_path = function(path) {
+var normalizePath = function(path) {
     // make relative paths absolute in context of our virtual file tree
 
     while (path && path[0] == '/') {
         path = path.substr(1);
     }
 
-    var result = window.global_context.current_path;
+    var result = window.globalContext.current_path;
     result = result.split('/');
     result.pop();
     result = result.concat(path.split('/'));
@@ -94,14 +94,14 @@ var normalize_path = function(path) {
     });
 
     result = array.join('/');
-    // console.log(`Normalized path: ${path} -> ${result} (@${window.global_context.current_path})`);
+    // console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
     return result;
 };
 
 
-var on_set_data = function(argument) {
-    // window.global_context = argument;
-    console.debug("Received data from parent", window.global_context);
+var onSetData = function(argument) {
+    // window.globalContext = argument;
+    console.debug("Received data from parent", window.globalContext);
     try {
         // window.document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: true, cancelable: true }));
     } finally {
@@ -128,10 +128,10 @@ var on_set_data = function(argument) {
 }
 
 
-var fix_link = function(a) {
-    if (is_virtual(a.getAttribute('href'))) {
-        // a.addEventListener('click', virtual_click);
-        a.setAttribute("onclick", "virtual_click(event)");
+var fixLink = function(a) {
+    if (isVirtual(a.getAttribute('href'))) {
+        // a.addEventListener('click', virtualClick);
+        a.setAttribute("onclick", "virtualClick(event)");
     } else if (a.getAttribute('href').startsWith('#')) {
         a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
     } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
@@ -142,22 +142,22 @@ var fix_link = function(a) {
 };
 
 
-var fix_form = function(form) {
+var fixForm = function(form) {
     var href = form.getAttribute('action');
-    if (is_virtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-        // form.addEventListener('submit', virtual_click);
-        form.setAttribute("onsubmit", "virtual_click(event)");
+    if (isVirtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
+        // form.addEventListener('submit', virtualClick);
+        form.setAttribute("onsubmit", "virtualClick(event)");
     }
 };
 
 
-var embed_img = function(img) {
+var embedImg = function(img) {
     if (img.hasAttribute('src')) {
         const src = img.getAttribute('src');
-        if (is_virtual(src)) {
-            var path = normalize_path(src);
-            const file = retrieve_file(path);
-            const mime_type = window.global_context.file_tree[path].mime_type;
+        if (isVirtual(src)) {
+            var path = normalizePath(src);
+            const file = retrieveFile(path);
+            const mime_type = window.globalContext.fileTree[path].mime_type;
             if (mime_type == 'image/svg+xml') {
                 img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
             } else {
@@ -168,9 +168,9 @@ var embed_img = function(img) {
 };
 
 
-var on_scroll_to_anchor = function(argument) {
-    if (window.global_context.anchor) {
-        document.location.replace("about:srcdoc#" + window.global_context.anchor);
+var onScrollToAnchor = function(argument) {
+    if (window.globalContext.anchor) {
+        document.location.replace("about:srcdoc#" + window.globalContext.anchor);
     }
 }
 
@@ -180,20 +180,20 @@ const observer = new MutationObserver((mutationList) => {
     mutationList.forEach((mutation) => {
         if (mutation.type == 'childList') {
             Array.from(mutation.target.querySelectorAll("a")).forEach( a => {
-                fix_link(a);
+                fixLink(a);
             });
             Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
-                embed_img(img);
+                embedImg(img);
             });
             Array.from(mutation.target.querySelectorAll("form")).forEach( form => {
-                fix_form(form);
+                fixForm(form);
             });
         }
     });
 });
 
 
-var monkey_patch = function() {
+var monkeyPatch = function() {
     if (typeof jQuery === 'undefined') {return;} // Only for jQuery at the moment
     /**
      * Monkey patch getQueryParameters
@@ -205,7 +205,7 @@ var monkey_patch = function() {
     jQuery._getQueryParameters = jQuery.getQueryParameters;
     jQuery.getQueryParameters = function(s) {
       if (typeof s === 'undefined')
-        s = '?' + window.global_context.get_parameters;
+        s = '?' + window.globalContext.getParameters;
       return jQuery._getQueryParameters(s);
     };
 
@@ -216,11 +216,11 @@ var monkey_patch = function() {
      */
     jQuery._ajax = jQuery.ajax;
     jQuery.ajax = function(settings) {
-        url = normalize_path(settings.url);
-        if (is_virtual(url)) {
+        url = normalizePath(settings.url);
+        if (isVirtual(url)) {
             var result;
             var data;
-            data = retrieve_file(url);
+            data = retrieveFile(url);
             result = settings.complete({responseText: data}, "");
             return; // Return value not actually needed in searchtools.js
         } else {
@@ -229,15 +229,15 @@ var monkey_patch = function() {
     };
 }
 
-monkey_patch();
+monkeyPatch();
 
 // Set up message listener
 window.addEventListener("message", (evnt) => {
     console.log("Received message in iframe", evnt);
     if (evnt.data.action == 'set_data') {
-        on_set_data(evnt.data.argument);
+        onSetData(evnt.data.argument);
     } else if (evnt.data.action == 'scroll_to_anchor') {
-        on_scroll_to_anchor(evnt.data.argument);
+        onScrollToAnchor(evnt.data.argument);
     }
 }, false);
 

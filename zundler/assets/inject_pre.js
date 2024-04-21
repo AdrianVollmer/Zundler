@@ -7,7 +7,7 @@
  * creative.
  *
  * Here, we patch the `URLSearchParams` class so it returns the information
- * stored in `window.global_context.get_parameters`.
+ * stored in `window.globalContext.getParameters`.
  *
  */
 
@@ -16,12 +16,12 @@ const originalGet = URLSearchParams.prototype.get;
 var myGet = function (arg) {
     // If searchtools.js of sphinx is used
     if (
-        window.global_context &&
-        window.global_context.get_parameters &&
+        window.globalContext &&
+        window.globalContext.getParameters &&
         (window.location.search === "") &&
         (Array.from(this.entries()).length == 0)
     ) {
-        const params = new URLSearchParams('?' + window.global_context.get_parameters);
+        const params = new URLSearchParams('?' + window.globalContext.getParameters);
         const result = params.get(arg);
         // console.log("Return virtual get parameter:", arg, result);
         return result;
@@ -80,18 +80,18 @@ var _base64ToArrayBuffer = function (base64) {
 };
 
 window.fetch = async (...args) => {
-    // wait until global_context is ready
+    // wait until globalContext is ready
     try {
-        await waitFor(() => window.hasOwnProperty("global_context"), 10000);
+        await waitFor(() => window.hasOwnProperty("globalContext"), 10000);
     } catch (err) {
         throw err;
     }
 
     let [resource, config ] = args;
-    var path = normalize_path(resource);
+    var path = normalizePath(resource);
     var response;
-    if (is_virtual(path)) {
-        var file = retrieve_file(path);
+    if (isVirtual(path)) {
+        var file = retrieveFile(path);
         var data = file.data;
         if (file.base64encoded) {
             data = _base64ToArrayBuffer(data);

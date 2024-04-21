@@ -98,7 +98,7 @@ https://github.com/AdrianVollmer/Zundler
 <html>
 <head><style>{style}</style></head>
 <body>{body}
-<script>window.global_context = "{global_context}"</script>
+<script>window.globalContext = "{global_context}"</script>
 <script>{pako} \n//# sourceURL=pako.js</script>
 <script>{bootstrap} \n//# sourceURL=boostrap.js</script>
 </body><!-- {license} --></html>
