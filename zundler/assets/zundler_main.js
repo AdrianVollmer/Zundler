@@ -76,6 +76,8 @@ var prepare = function(html) {
     fixLinks(doc);
     fixForms(doc);
 
+    window.document.title = doc.title;
+
     return doc.documentElement.outerHTML;
 }
 
@@ -177,11 +179,7 @@ window.onload = function() {
         var iframe = document.getElementById(iFrameId);
 
         if (evnt.data.action == 'ready') {
-            // iframe is ready to receive the globalContext
-            iframe.contentWindow.postMessage({
-                action: "set_data",
-                argument: window.globalContext,
-            }, "*");
+            hideLoadingIndicator();
 
         } else if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
