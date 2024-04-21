@@ -100,12 +100,26 @@ var normalize_path = function(path) {
 
 
 var on_set_data = function(argument) {
-    window.global_context = argument;
+    // window.global_context = argument;
     console.debug("Received data from parent", window.global_context);
     try {
-        monkey_patch();
+        // window.document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: true, cancelable: true }));
     } finally {
         observer.observe(window.document.body, {subtree: true, childList: true});
+
+        // Set parent window title and trigger data transmission
+        var favicon = window.document.querySelector("link[rel*='icon']");
+        if (favicon) { favicon = favicon.getAttribute('href'); }
+        var title = window.document.title;
+
+        window.parent.postMessage({
+            action: "set_title",
+            argument: {
+                title: title,
+                favicon: favicon
+            }
+        }, '*');
+
         window.parent.postMessage({
             action: "show_iframe",
             argument: "",
@@ -215,33 +229,18 @@ var monkey_patch = function() {
     };
 }
 
+monkey_patch();
 
-var on_load = function() {
-    // Set up message listener
-    window.addEventListener("message", (evnt) => {
-        console.log("Received message in iframe", evnt);
-        if (evnt.data.action == 'set_data') {
-            on_set_data(evnt.data.argument);
-        } else if (evnt.data.action == 'scroll_to_anchor') {
-            on_scroll_to_anchor(evnt.data.argument);
-        }
-    }, false);
+// Set up message listener
+window.addEventListener("message", (evnt) => {
+    console.log("Received message in iframe", evnt);
+    if (evnt.data.action == 'set_data') {
+        on_set_data(evnt.data.argument);
+    } else if (evnt.data.action == 'scroll_to_anchor') {
+        on_scroll_to_anchor(evnt.data.argument);
+    }
+}, false);
 
-    // Set parent window title and trigger data transmission
-    var favicon = window.document.querySelector("link[rel*='icon']");
-    if (favicon) { favicon = favicon.getAttribute('href'); }
-    var title = window.document.querySelector('head>title');
-    if (title) { title = title.innerText; }
-
-    window.parent.postMessage({
-        action: "set_title",
-        argument: {
-            title: title,
-            favicon: favicon
-        }
-    }, '*');
-
-};
-
-
-window.addEventListener('load', on_load);
+window.parent.postMessage({
+    action: "ready",
+}, '*');

@@ -68,14 +68,41 @@ var split_url = function(url) {
     return result;
 };
 
+
 var prepare = function(html) {
+    function unicodeToBase64(string) {
+        const utf8EncodedString = unescape(encodeURIComponent(string));
+        return btoa(utf8EncodedString);
+    }
+
     var parser = new DOMParser();
     var doc = parser.parseFromString(html, "text/html");
+
+    const scriptTag = doc.createElement("script");
+    // Convert JSON object to b64 because it contain all kinds of
+    // problematic characters: `, ", ', &, </script>, ...
+    // atob is insufficient, because it only deals with ASCII - we have
+    // unicode
+    var serializedGC = unicodeToBase64(JSON.stringify(window.global_context));
+
+    scriptTag.textContent = `
+        function base64ToUnicode(base64String) {
+            const utf8EncodedString = atob(base64String);
+            return decodeURIComponent(escape(utf8EncodedString));
+        }
+
+        window.global_context = JSON.parse(base64ToUnicode("${serializedGC}"));
+    `;
+
+    doc.head.prepend(scriptTag);
+
     embed_js(doc);
     embed_css(doc);
     embed_imgs(doc);
+
     fix_links(doc);
     fix_forms(doc);
+
     return doc.documentElement.outerHTML;
 }
 
@@ -195,10 +222,10 @@ var load_virtual_page = (function (path, get_params, anchor) {
     window.global_context.get_parameters = get_params;
 
     if (file.mime_type == 'text/html') {
-        const html = prepare(data);
-        iframe.setAttribute("srcdoc", html);
         window.global_context.current_path = path;
         window.global_context.anchor = anchor;
+        const html = prepare(data);
+        iframe.setAttribute("srcdoc", html);
         window.history.pushState({path, get_params, anchor}, '', '#');
         return true;
     } else {
@@ -241,16 +268,21 @@ window.onload = function() {
     // Set up message listener
     window.addEventListener("message", (evnt) => {
         console.log("Received message in parent", evnt);
-        if (evnt.data.action == 'set_title') {
-            // iframe has finished loading and sent us its title
-            // parent sets the title and responds with the global_context object
-            window.document.title = evnt.data.argument.title;
-            set_favicon(evnt.data.argument.favicon);
-            var iframe = document.getElementById(iFrameId);
+        var iframe = document.getElementById(iFrameId);
+
+        if (evnt.data.action == 'ready') {
+            // iframe is ready to receive the global_context
             iframe.contentWindow.postMessage({
                 action: "set_data",
                 argument: window.global_context,
             }, "*");
+
+        } else if (evnt.data.action == 'set_title') {
+            // iframe has finished loading and sent us its title
+            // parent sets the title and responds with the global_context object
+            window.document.title = evnt.data.argument.title;
+            set_favicon(evnt.data.argument.favicon);
+
         } else if (evnt.data.action == 'virtual_click') {
             // user has clicked on a link in the iframe
             show_loading_indictator();
@@ -262,10 +294,10 @@ window.onload = function() {
             if (!loaded) {
                 hide_loading_indictator();
             }
+
         } else if (evnt.data.action == 'show_iframe') {
             // iframe finished fixing the document and is ready to be shown;
             hide_loading_indictator();
-            var iframe = document.getElementById(iFrameId);
             iframe.contentWindow.postMessage({
                 action: "scroll_to_anchor",
             }, "*");

@@ -14,7 +14,6 @@
 const originalGet = URLSearchParams.prototype.get;
 
 var myGet = function (arg) {
-    const originalResult = originalGet.apply(this, [arg]);
     // If searchtools.js of sphinx is used
     if (
         window.global_context &&
@@ -27,6 +26,7 @@ var myGet = function (arg) {
         // console.log("Return virtual get parameter:", arg, result);
         return result;
     } else {
+        const originalResult = originalGet.apply(this, [arg]);
         return originalResult;
     }
 };
