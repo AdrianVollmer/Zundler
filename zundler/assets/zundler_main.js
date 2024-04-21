@@ -181,6 +181,8 @@ window.onload = function() {
         if (evnt.data.action == 'ready') {
             hideLoadingIndicator();
 
+        } else if (evnt.data.action == 'showMenu') {
+            showMenu();
         } else if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
             // parent sets the title and responds with the globalContext object
@@ -232,3 +234,13 @@ var hideLoadingIndicator = function() {
     var loading = document.getElementById('loading-indicator');
     loading.style.display = 'none';
 }
+
+function showMenu() {
+    // TODO show the menu containing info and functions
+}
+
+document.addEventListener('keyup', function (event) {
+    if (event.key == "Z" && event.ctrlKey){
+        showMenu();
+    }
+});

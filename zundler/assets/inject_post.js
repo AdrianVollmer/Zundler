@@ -124,3 +124,12 @@ window.addEventListener("message", (evnt) => {
 window.parent.postMessage({
     action: "ready",
 }, '*');
+
+
+document.addEventListener('keyup', function (event) {
+    if (event.key == "Z" && event.ctrlKey){
+        window.parent.postMessage({
+            action: "showMenu",
+        }, '*');
+    }
+});
