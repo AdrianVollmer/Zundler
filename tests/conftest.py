@@ -18,6 +18,44 @@ def chrome_driver():
     _driver.quit()
 
 
+@pytest.fixture(scope="session")
+def docker_compose_command() -> str:
+    return "podman-compose"
+
+
+def is_responsive(port):
+    import socket
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        result = sock.connect_ex(('127.0.0.1',port))
+        if result == 0:
+           return True
+        else:
+           return False
+        sock.close()
+    except Exception:
+        return False
+
+
+@pytest.fixture(scope="session")
+def selenium_service(docker_ip, docker_services):
+    # `port_for` takes a container port and returns the corresponding host port
+    port = docker_services.port_for("firefox", 5900)
+    docker_services.wait_until_responsive(
+        timeout=30.0, pause=0.1, check=lambda: is_responsive(port)
+    )
+
+    options = webdriver.FirefoxOptions()
+    driver = webdriver.Remote(
+        command_executor='http://localhost:4444/wd/hub',
+        options=options,
+    )
+
+    yield driver
+
+    driver.quit()
+
+
 @pytest.fixture(autouse=True)
 def run_make_commands(request):
     # Get the directory of the current test file

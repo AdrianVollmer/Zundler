@@ -8,17 +8,17 @@ from selenium.webdriver.common.keys import Keys
 TEST_DIR = Path(__file__).resolve().parent
 
 
-def test_copy_button(selenium):
-    path = TEST_DIR / "copy-button//_build//zundler//index.html"
-    selenium.get(path.as_uri())
+def test_copy_button(selenium_service):
+    path = Path("//mnt//copy-button//_build//zundler//index.html")
+    selenium_service.get(path.as_uri())
 
     time.sleep(1)
 
-    assert "copy-button documentation" in selenium.title
+    assert "copy-button documentation" in selenium_service.title
 
-    selenium.switch_to.frame("zundler-iframe")
+    selenium_service.switch_to.frame("zundler-iframe")
 
-    button = selenium.find_element(By.CSS_SELECTOR, "button.copybtn")
+    button = selenium_service.find_element(By.CSS_SELECTOR, "button.copybtn")
 
     assert button.get_attribute("data-tooltip") == "Copy"
     assert "success" not in button.get_attribute("class")
