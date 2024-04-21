@@ -27,7 +27,6 @@ classifiers = [
 urls = {Homepage = "https://github.com/AdrianVollmer/Zundler"}
 dependencies = [
     "sphinx",
-    "bs4",
     "lxml",
     "python-magic",
 ]

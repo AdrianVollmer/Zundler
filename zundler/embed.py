@@ -54,6 +54,10 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
     ]:
         path = os.path.join(SCRIPT_PATH, "assets", filename)
         init_files[filename] = open(path, "r").read()
+        if filename == "inject_pre.js":
+            init_files[filename] = append_pre + init_files[filename]
+        if filename == "inject_post.js":
+            init_files[filename] += append_post
 
     if not os.path.exists(index_file):
         raise FileNotFoundError("no such file: %s" % index_file)
@@ -65,12 +69,8 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
     if not output_path:
         output_path = os.path.join(base_dir, new_base_name)
 
-    before = init_files["inject_pre.js"] + append_pre
-    after = init_files["inject_post.js"] + append_post
     file_tree = load_filetree(
         base_dir,
-        before=before,
-        after=after,
         exclude_pattern=new_base_name,
     )
 
@@ -119,17 +119,13 @@ https://github.com/AdrianVollmer/Zundler
     return output_path
 
 
-def prepare_file(filename, before, after):
+def prepare_file(filename):
     """Prepare a file for the file tree
 
     Referenced assets in CSS files will be embedded.
     HTML files will be injected with two scripts.
 
     `filename`: The name of the file
-    `before`: Javascript code that will be inserted as the first child of
-        `<body>` if the file is HTML.
-    `after`: Javascript code that will be inserted as the last child of
-        `<body>` if the file is HTML.
 
     """
     _, ext = os.path.splitext(filename)
@@ -158,14 +154,6 @@ def prepare_file(filename, before, after):
         data = base64.b64encode(data).decode()
         base64encoded = True
 
-    elif ext in ["html", "htm"]:
-        data = embed_html_resources(
-            data,
-            os.path.dirname(filename),
-            before,
-            after,
-        ).encode()
-
     if not isinstance(data, str):
         try:
             data = data.decode()
@@ -188,32 +176,6 @@ def deflate(data):
     data = zlib.compress(data.encode())
     data = base64.b64encode(data).decode()
     return data
-
-
-def embed_html_resources(html, base_dir, before, after):
-    """Embed fonts in preload links to avoid jumps when loading"""
-    # This cannot be done in JavaScript, it would be too late
-
-    import bs4
-
-    soup = bs4.BeautifulSoup(html, "lxml")
-    body = soup.find("body")
-    head = soup.find("head")
-
-    if head and before:
-        script = soup.new_tag("script")
-        script.string = before + "\n//# sourceURL=inject_pre.js"
-        head.insert(0, script)
-
-    if body and after:
-        script = soup.new_tag("script")
-        script.string = after + "\n//# sourceURL=inject_post.js"
-        body.append(script)
-
-    # TODO embed remote resources in case we want the entire file to be
-    # usable in an offline environment
-
-    return str(soup)
 
 
 def to_data_uri(filename, mime_type=None):
@@ -321,7 +283,7 @@ def mime_type_from_bytes(filename, buffer):
     return mime_type
 
 
-def load_filetree(base_dir, before=None, after=None, exclude_pattern=None):
+def load_filetree(base_dir, exclude_pattern=None):
     """Load entire directory in a dict"""
 
     result = {}
@@ -331,11 +293,7 @@ def load_filetree(base_dir, before=None, after=None, exclude_pattern=None):
             continue
         if path.is_file():
             key = path.relative_to(base_dir).as_posix()
-            result[key] = prepare_file(
-                path.as_posix(),
-                before,
-                after,
-            )
+            result[key] = prepare_file(path.as_posix())
             logger.debug("Packed file %s [%d]" % (key, len(result[key])))
 
     return result

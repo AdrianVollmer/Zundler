@@ -1,4 +1,9 @@
 /*
+ * This file will be inserted as the first child of the iframe's <head>
+ * after `common.js` and the definition of the global context.
+ */
+
+/*
  * Monkeypatch URLSearchParams
  *
  * Sphinx documents that use `searchtool.js` rely on passing information via
@@ -10,6 +15,18 @@
  * stored in `window.globalContext.getParameters`.
  *
  */
+
+var _base64ToArrayBuffer = function (base64) {
+    if (!base64) { return []}
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+};
+
 
 const originalGet = URLSearchParams.prototype.get;
 
@@ -67,17 +84,6 @@ async function waitFor(predicate, timeout) {
     }, timeout);
   });
 }
-
-var _base64ToArrayBuffer = function (base64) {
-    if (!base64) { return []}
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-};
 
 window.fetch = async (...args) => {
     // wait until globalContext is ready

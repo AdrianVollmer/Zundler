@@ -31,43 +31,6 @@ var createIframe = function() {
     return iframe;
 }
 
-var retrieveFile = function(path) {
-    // console.log("Retrieving file: " + path);
-    var fileTree = window.globalContext.fileTree;
-    var file = fileTree[path];
-    if (!file) {
-        console.warn("File not found: " + path);
-        return "";
-    } else {
-        return file;
-    }
-};
-
-var isVirtual = function(url) {
-    // Return true if the url should be retrieved from the virtual file tree
-    var _url = url.toString().toLowerCase();
-    return (! (
-        _url == "" ||
-        _url[0] == "#" ||
-        _url.startsWith('https:/') ||
-        _url.startsWith('http:/') ||
-        _url.startsWith('data:') ||
-        _url.startsWith('about:srcdoc') ||
-        _url.startsWith('blob:')
-    ));
-};
-
-var splitUrl = function(url) {
-    // Return a list of three elements: path, GET parameters, anchor
-    var anchor = url.split('#')[1] || "";
-    var getParameters = url.split('#')[0].split('?')[1] || "";
-    var path = url.split('#')[0];
-    path = path.split('?')[0];
-    let result = [path, getParameters, anchor];
-    // console.log("Split URL", url, result);
-    return result;
-};
-
 
 var prepare = function(html) {
     function unicodeToBase64(string) {
@@ -78,14 +41,14 @@ var prepare = function(html) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(html, "text/html");
 
-    const scriptTag = doc.createElement("script");
+    const gcTag = doc.createElement("script");
     // Convert JSON object to b64 because it contain all kinds of
     // problematic characters: `, ", ', &, </script>, ...
     // atob is insufficient, because it only deals with ASCII - we have
     // unicode
     var serializedGC = unicodeToBase64(JSON.stringify(window.globalContext));
 
-    scriptTag.textContent = `
+    gcTag.textContent = `
         function base64ToUnicode(base64String) {
             const utf8EncodedString = atob(base64String);
             return decodeURIComponent(escape(utf8EncodedString));
@@ -94,7 +57,17 @@ var prepare = function(html) {
         window.globalContext = JSON.parse(base64ToUnicode("${serializedGC}"));
     `;
 
-    doc.head.prepend(scriptTag);
+    const commonTag = doc.createElement("script");
+    commonTag.textContent = retrieveFile("common.js").data
+    const injectPreTag = doc.createElement("script");
+    injectPreTag.textContent = retrieveFile("inject_pre.js").data
+    const injectPostTag = doc.createElement("script");
+    injectPostTag.textContent = retrieveFile("inject_post.js").data
+
+    doc.head.prepend(commonTag);
+    doc.head.prepend(gcTag);
+    doc.head.prepend(injectPreTag);
+    doc.body.append(injectPostTag);
 
     embedJs(doc);
     embedCss(doc);
@@ -105,6 +78,7 @@ var prepare = function(html) {
 
     return doc.documentElement.outerHTML;
 }
+
 
 var embedJs = function(doc) {
     Array.from(doc.querySelectorAll("script")).forEach( oldScript => {
@@ -151,51 +125,10 @@ var fixLinks = function(doc) {
     });
 };
 
-
-var fixLink = function(a) {
-    if (isVirtual(a.getAttribute('href'))) {
-        // a.addEventListener('click', virtualClick);
-        a.setAttribute("onclick", "virtualClick(event)");
-    } else if (a.getAttribute('href').startsWith('#')) {
-        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
-    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
-        // External links should open in a new tab. Browsers block links to
-        // sites of different origin within an iframe for security reasons.
-        a.setAttribute('target', "_blank");
-    }
-};
-
-
-var fixForm = function(form) {
-    var href = form.getAttribute('action');
-    if (isVirtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-        // form.addEventListener('submit', virtualClick);
-        form.setAttribute("onsubmit", "virtualClick(event)");
-    }
-};
-
-
 var fixForms = function(doc) {
     Array.from(doc.querySelectorAll("form")).forEach( form => {
         fixForm(form);
     });
-};
-
-
-var embedImg = function(img) {
-    if (img.hasAttribute('src')) {
-        const src = img.getAttribute('src');
-        if (isVirtual(src)) {
-            var path = normalizePath(src);
-            const file = retrieveFile(path);
-            const mime_type = file.mime_type;
-            if (mime_type == 'image/svg+xml') {
-                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
-            } else {
-                img.setAttribute('src', `data:${mime_type};base64, ${file.data}`);
-            }
-        };
-    };
 };
 
 
@@ -235,33 +168,6 @@ var loadVirtualPage = (function (path, get_params, anchor) {
         return false;
     }
 });
-
-
-var normalizePath = function(path) {
-    // TODO remove redundant definition of this function (in inject.js)
-    // make relative paths absolute
-    var result = window.globalContext.current_path;
-    result = result.split('/');
-    result.pop();
-    result = result.concat(path.split('/'));
-
-    // resolve relative directories
-    var array = [];
-    Array.from(result).forEach( component => {
-        if (component == '..') {
-            if (array) {
-                array.pop();
-            }
-        } else if (component == '.') {
-        } else {
-            if (component) { array.push(component); }
-        }
-    });
-
-    result = array.join('/');
-    // console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
-    return result;
-};
 
 
 window.onload = function() {

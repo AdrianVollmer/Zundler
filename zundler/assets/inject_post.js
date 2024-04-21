@@ -1,14 +1,6 @@
-var splitUrl = function(url) {
-    // Return a list of three elements: path, GET parameters, anchor
-    var anchor = url.split('#')[1] || "";
-    var getParameters = url.split('#')[0].split('?')[1] || "";
-    var path = url.split('#')[0];
-    path = path.split('?')[0];
-    let result = [path, getParameters, anchor];
-    // console.log("Split URL", url, result);
-    return result;
-}
-
+/*
+ * This file will be inserted as the last child of the iframe's <body>
+ */
 
 var virtualClick = function(evnt) {
     // Handle GET parameters and anchors
@@ -42,6 +34,7 @@ var virtualClick = function(evnt) {
     return false;
 };
 
+
 var isVirtual = function(url) {
     // Return true if the url should be retrieved from the virtual file tree
     var _url = url.toString().toLowerCase();
@@ -54,117 +47,6 @@ var isVirtual = function(url) {
         _url.startsWith('about:srcdoc') ||
         _url.startsWith('blob:')
     ));
-};
-
-var retrieveFile = function(path) {
-    // console.log("Retrieving file: " + path);
-    var fileTree = window.globalContext.fileTree;
-    var file = fileTree[path];
-    if (!file) {
-        console.warn("File not found: " + path);
-        return "";
-    } else {
-        return file;
-    }
-};
-
-var normalizePath = function(path) {
-    // make relative paths absolute in context of our virtual file tree
-
-    while (path && path[0] == '/') {
-        path = path.substr(1);
-    }
-
-    var result = window.globalContext.current_path;
-    result = result.split('/');
-    result.pop();
-    result = result.concat(path.split('/'));
-
-    // resolve relative directories
-    var array = [];
-    Array.from(result).forEach( component => {
-        if (component == '..') {
-            if (array) {
-                array.pop();
-            }
-        } else if (component == '.') {
-        } else {
-            if (component) { array.push(component); }
-        }
-    });
-
-    result = array.join('/');
-    // console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
-    return result;
-};
-
-
-var onSetData = function(argument) {
-    // window.globalContext = argument;
-    console.debug("Received data from parent", window.globalContext);
-    try {
-        // window.document.dispatchEvent(new Event("DOMContentLoaded", { bubbles: true, cancelable: true }));
-    } finally {
-        observer.observe(window.document.body, {subtree: true, childList: true});
-
-        // Set parent window title and trigger data transmission
-        var favicon = window.document.querySelector("link[rel*='icon']");
-        if (favicon) { favicon = favicon.getAttribute('href'); }
-        var title = window.document.title;
-
-        window.parent.postMessage({
-            action: "set_title",
-            argument: {
-                title: title,
-                favicon: favicon
-            }
-        }, '*');
-
-        window.parent.postMessage({
-            action: "show_iframe",
-            argument: "",
-        }, '*');
-    }
-}
-
-
-var fixLink = function(a) {
-    if (isVirtual(a.getAttribute('href'))) {
-        // a.addEventListener('click', virtualClick);
-        a.setAttribute("onclick", "virtualClick(event)");
-    } else if (a.getAttribute('href').startsWith('#')) {
-        a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
-    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
-        // External links should open in a new tab. Browsers block links to
-        // sites of different origin within an iframe for security reasons.
-        a.setAttribute('target', "_blank");
-    }
-};
-
-
-var fixForm = function(form) {
-    var href = form.getAttribute('action');
-    if (isVirtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
-        // form.addEventListener('submit', virtualClick);
-        form.setAttribute("onsubmit", "virtualClick(event)");
-    }
-};
-
-
-var embedImg = function(img) {
-    if (img.hasAttribute('src')) {
-        const src = img.getAttribute('src');
-        if (isVirtual(src)) {
-            var path = normalizePath(src);
-            const file = retrieveFile(path);
-            const mime_type = window.globalContext.fileTree[path].mime_type;
-            if (mime_type == 'image/svg+xml') {
-                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file));
-            } else {
-                img.setAttribute('src', `data:${mime_type};base64, ${file}`);
-            }
-        };
-    };
 };
 
 
