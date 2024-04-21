@@ -17,4 +17,5 @@ GC = pako.inflate(GC);
 GC = new TextDecoder("utf-8").decode(GC);
 GC = JSON.parse(GC);
 window.globalContext = GC;
-eval(window.globalContext.main);
+eval(window.globalContext.utils.zundler_common);
+eval(window.globalContext.utils.zundler_main);

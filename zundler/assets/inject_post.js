@@ -116,9 +116,7 @@ monkeyPatch();
 // Set up message listener
 window.addEventListener("message", (evnt) => {
     console.log("Received message in iframe", evnt);
-    if (evnt.data.action == 'set_data') {
-        onSetData(evnt.data.argument);
-    } else if (evnt.data.action == 'scroll_to_anchor') {
+    if (evnt.data.action == 'scroll_to_anchor') {
         onScrollToAnchor(evnt.data.argument);
     }
 }, false);

@@ -45,8 +45,9 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
     for filename in [
         "init.css",
         "init.html",
-        "bootstrap.js",
-        "main.js",
+        "zundler_bootstrap.js",
+        "zundler_common.js",
+        "zundler_main.js",
         "inject_pre.js",
         "inject_post.js",
         "pako.min.js",
@@ -58,6 +59,8 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
             init_files[filename] = append_pre + init_files[filename]
         if filename == "inject_post.js":
             init_files[filename] += append_post
+        if filename.lower().endswith(".js"):
+            init_files[filename] += "\n\n//# sourceURL=%s" % filename
 
     if not os.path.exists(index_file):
         raise FileNotFoundError("no such file: %s" % index_file)
@@ -74,13 +77,15 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
         exclude_pattern=new_base_name,
     )
 
-    remote_resources = []
-
     global_context = {
         "current_path": base_name,
-        "file_tree": file_tree,
-        "remote_resources": remote_resources,
-        "main": init_files["main.js"] + "\n//# sourceURL=main.js",
+        "fileTree": file_tree,
+        "utils": {
+            "zundler_main": init_files["zundler_main.js"],
+            "zundler_common": init_files["zundler_common.js"],
+            "inject_pre": init_files["inject_pre.js"],
+            "inject_post": init_files["inject_post.js"],
+        },
     }
 
     global_context = json.dumps(global_context)
@@ -100,13 +105,13 @@ https://github.com/AdrianVollmer/Zundler
 <body>{body}
 <script>window.globalContext = "{global_context}"</script>
 <script>{pako} \n//# sourceURL=pako.js</script>
-<script>{bootstrap} \n//# sourceURL=boostrap.js</script>
+<script>{bootstrap} \n//# sourceURL=zundler_boostrap.js</script>
 </body><!-- {license} --></html>
 """.format(
         style=init_files["init.css"],
         body=init_files["init.html"],
         pako=init_files["pako.min.js"],
-        bootstrap=init_files["bootstrap.js"],
+        bootstrap=init_files["zundler_bootstrap.js"],
         global_context=global_context,
         license=init_files["LICENSE"],
         version=__version__,

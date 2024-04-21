@@ -58,11 +58,11 @@ var prepare = function(html) {
     `;
 
     const commonTag = doc.createElement("script");
-    commonTag.textContent = retrieveFile("common.js").data
+    commonTag.textContent = window.globalContext.utils.zundler_common;
     const injectPreTag = doc.createElement("script");
-    injectPreTag.textContent = retrieveFile("inject_pre.js").data
+    injectPreTag.textContent = window.globalContext.utils.inject_pre;
     const injectPostTag = doc.createElement("script");
-    injectPostTag.textContent = retrieveFile("inject_post.js").data
+    injectPostTag.textContent = window.globalContext.utils.inject_post;
 
     doc.head.prepend(commonTag);
     doc.head.prepend(gcTag);
