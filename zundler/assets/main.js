@@ -296,5 +296,3 @@ var hide_loading_indictator = function() {
     var loading = document.getElementById('loading-indicator');
     loading.style.display = 'none';
 }
-
-//# sourceURL=main.js

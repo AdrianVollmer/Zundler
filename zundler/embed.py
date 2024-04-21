@@ -80,7 +80,7 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
         "current_path": base_name,
         "file_tree": file_tree,
         "remote_resources": remote_resources,
-        "main": init_files["main.js"],
+        "main": init_files["main.js"] + "\n//# sourceURL=main.js",
     }
 
     global_context = json.dumps(global_context)
