@@ -24,6 +24,7 @@ var isVirtual = function(url) {
         _url.startsWith('https:/') ||
         _url.startsWith('http:/') ||
         _url.startsWith('data:') ||
+        _url.startsWith('javascript:') ||
         _url.startsWith('about:srcdoc') ||
         _url.startsWith('blob:')
     ));
