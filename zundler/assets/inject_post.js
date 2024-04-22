@@ -35,21 +35,6 @@ var virtualClick = function(evnt) {
 };
 
 
-var isVirtual = function(url) {
-    // Return true if the url should be retrieved from the virtual file tree
-    var _url = url.toString().toLowerCase();
-    return (! (
-        _url == "" ||
-        _url[0] == "#" ||
-        _url.startsWith('https:/') ||
-        _url.startsWith('http:/') ||
-        _url.startsWith('data:') ||
-        _url.startsWith('about:srcdoc') ||
-        _url.startsWith('blob:')
-    ));
-};
-
-
 var onScrollToAnchor = function(argument) {
     if (window.globalContext.anchor) {
         document.location.replace("about:srcdoc#" + window.globalContext.anchor);
