@@ -38,22 +38,26 @@ def is_responsive(port):
 
 
 @pytest.fixture(scope="session")
-def selenium_service(docker_ip, docker_services):
+def selenium_drivers(docker_ip, docker_services):
     # `port_for` takes a container port and returns the corresponding host port
-    port = docker_services.port_for("firefox", 5900)
-    docker_services.wait_until_responsive(
-        timeout=30.0, pause=0.1, check=lambda: is_responsive(port)
-    )
+    drivers = {}
 
-    options = webdriver.FirefoxOptions()
-    driver = webdriver.Remote(
-        command_executor='http://localhost:4444/wd/hub',
-        options=options,
-    )
+    for browser in ["firefox"]:
+        port = docker_services.port_for(browser, 5900)
+        docker_services.wait_until_responsive(
+            timeout=30.0, pause=0.1, check=lambda: is_responsive(port)
+        )
 
-    yield driver
+        options = webdriver.FirefoxOptions()
+        drivers[browser] = webdriver.Remote(
+            command_executor=f'http://localhost:4444/wd/hub',
+            options=options,
+        )
 
-    driver.quit()
+    yield drivers
+
+    for browser, driver in drivers.items():
+        driver.quit()
 
 
 @pytest.fixture(autouse=True)
