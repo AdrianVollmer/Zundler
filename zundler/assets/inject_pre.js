@@ -69,7 +69,6 @@ const { fetch: originalFetch } = window;
 async function waitFor(predicate, timeout) {
   return new Promise((resolve, reject) => {
     const check = () => {
-      console.log('checking', predicate());
       if (!predicate()) return;
       clearInterval(interval);
       resolve();
