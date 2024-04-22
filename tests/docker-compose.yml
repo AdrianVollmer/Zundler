@@ -14,19 +14,19 @@ services:
     volumes:
       - .:/mnt
 
-  edge:
-    image: docker.io/selenium/node-edge:4.19.1-20240402
-    shm_size: 2gb
-    depends_on:
-      - selenium-hub
-    environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
-      - SE_EVENT_BUS_PUBLISH_PORT=4442
-      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-    ports:
-      - "6901:5900"
-    volumes:
-      - .:/mnt
+  #  edge:
+  #    image: docker.io/selenium/node-edge:4.19.1-20240402
+  #    shm_size: 2gb
+  #    depends_on:
+  #      - selenium-hub
+  #    environment:
+  #      - SE_EVENT_BUS_HOST=selenium-hub
+  #      - SE_EVENT_BUS_PUBLISH_PORT=4442
+  #      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+  #    ports:
+  #      - "6901:5900"
+  #    volumes:
+  #      - .:/mnt
 
   firefox:
     image: docker.io/selenium/node-firefox:4.19.1-20240402
