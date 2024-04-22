@@ -111,7 +111,7 @@ window.fetch = async (...args) => {
 
 
 const observer = new MutationObserver((mutationList) => {
-    console.log("Fix mutated elements...", mutationList);
+    // console.log("Fix mutated elements...", mutationList);
     mutationList.forEach((mutation) => {
         if (mutation.type == 'childList') {
             Array.from(mutation.target.querySelectorAll("a")).forEach( a => {
