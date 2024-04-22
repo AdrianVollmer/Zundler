@@ -67,7 +67,7 @@ package.
 The recommended way is to run this:
 
 ```shell-session
-$ pip install git+https://github.com/AdrianVollmer/Zundler@main
+$ pip install zundler
 ```
 
 If you prefer an alternative like `pipx`, `poetry` or manually handled
