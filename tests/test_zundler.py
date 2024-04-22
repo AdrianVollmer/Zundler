@@ -8,17 +8,18 @@ from selenium.webdriver.common.keys import Keys
 TEST_DIR = Path(__file__).resolve().parent
 
 
-def test_copy_button(selenium_service):
+def test_copy_button(selenium_drivers):
     path = Path("//mnt//copy-button//_build//zundler//index.html")
-    selenium_service.get(path.as_uri())
+    selenium = selenium_drivers["firefox"]
+    selenium.get(path.as_uri())
 
     time.sleep(1)
 
-    assert "copy-button documentation" in selenium_service.title
+    assert "copy-button documentation" in selenium.title
 
-    selenium_service.switch_to.frame("zundler-iframe")
+    selenium.switch_to.frame("zundler-iframe")
 
-    button = selenium_service.find_element(By.CSS_SELECTOR, "button.copybtn")
+    button = selenium.find_element(By.CSS_SELECTOR, "button.copybtn")
 
     assert button.get_attribute("data-tooltip") == "Copy"
     assert "success" not in button.get_attribute("class")
@@ -33,8 +34,9 @@ def test_copy_button(selenium_service):
     assert button.location["y"] > 45
 
 
-def test_mermaid(selenium):
-    path = TEST_DIR / "mermaid//_build//zundler//index.html"
+def test_mermaid(selenium_drivers):
+    path = Path("//mnt//mermaid//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
     selenium.get(path.as_uri())
 
     time.sleep(1)
@@ -51,8 +53,9 @@ def test_mermaid(selenium):
     assert section.location["y"] > 500
 
 
-def test_multi_page(selenium):
-    path = TEST_DIR / "multi-page//_build//zundler//index.html"
+def test_multi_page(selenium_drivers):
+    path = Path("//mnt//multi-page//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
     selenium.get(path.as_uri())
 
     time.sleep(1)
@@ -72,8 +75,9 @@ def test_multi_page(selenium):
     assert selenium.title.startswith("Second")
 
 
-def test_multi_page_search(selenium):
-    path = TEST_DIR / "multi-page//_build//zundler//index.html"
+def test_multi_page_search(selenium_drivers):
+    path = Path("//mnt//multi-page//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
     selenium.get(path.as_uri())
 
     time.sleep(1)
