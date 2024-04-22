@@ -44,14 +44,18 @@ var splitUrl = function(url) {
 
 
 var fixLink = function(a) {
-    if (isVirtual(a.getAttribute('href'))) {
+    const href = a.getAttribute("href");
+    if (isVirtual(href)) {
         // virtualClick will be defined in the iFrame, but fixLink may be
         // called in the parent document, so we use `onclick`, because we
         // can define the function as a string
         a.setAttribute("onclick", "virtualClick(event)");
-    } else if (a.getAttribute('href').startsWith('#')) {
+    } else if (href.startsWith('#')) {
         a.setAttribute('href', "about:srcdoc" + a.getAttribute('href'))
-    } else if (!a.getAttribute('href').startsWith('about:srcdoc')) {
+    } else if (
+        !href.startsWith('about:srcdoc')
+        && !href.startsWith('javascript:')
+    ) {
         // External links should open in a new tab. Browsers block links to
         // sites of different origin within an iframe for security reasons.
         a.setAttribute('target', "_blank");
