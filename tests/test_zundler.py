@@ -86,11 +86,13 @@ def test_multi_page_search(selenium_drivers):
 
     selenium.switch_to.frame("zundler-iframe")
 
+    # Search for "Lorem"
     searchbox = selenium.find_element(By.CSS_SELECTOR, "#searchbox input[type='text']")
 
     searchbox.send_keys("Lorem" + Keys.ENTER)
+
     selenium.switch_to.parent_frame()
-    time.sleep(2)
+    time.sleep(1)
     selenium.switch_to.frame("zundler-iframe")
 
     assert selenium.title.startswith("Search")
@@ -98,3 +100,28 @@ def test_multi_page_search(selenium_drivers):
     span = selenium.find_element(By.CSS_SELECTOR, "span.highlighted")
 
     assert span.text == "Lorem"
+
+    # Click on first result
+    link = selenium.find_element(By.CSS_SELECTOR, "#search-results a")
+    link.click()
+
+    selenium.switch_to.parent_frame()
+    time.sleep(1)
+    selenium.switch_to.frame("zundler-iframe")
+
+    header = selenium.find_element(By.CSS_SELECTOR, "#first h1")
+
+    assert header.text.startswith("First")
+
+    span = selenium.find_element(By.CSS_SELECTOR, "span.highlighted")
+
+    assert span.text == "Lorem"
+
+    # Click on "Hide Search Matches"
+    hide_link = selenium.find_element(By.CSS_SELECTOR, "#searchbox a")
+
+    hide_link.click()
+
+    span = selenium.find_element(By.CSS_SELECTOR, "span.highlighted")
+
+    assert span == []
