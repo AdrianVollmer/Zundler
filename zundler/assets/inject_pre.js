@@ -108,3 +108,25 @@ window.fetch = async (...args) => {
     }
     return response;
 };
+
+
+const observer = new MutationObserver((mutationList) => {
+    console.log("Fix mutated elements...", mutationList);
+    mutationList.forEach((mutation) => {
+        if (mutation.type == 'childList') {
+            Array.from(mutation.target.querySelectorAll("a")).forEach( a => {
+                fixLink(a);
+            });
+            Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
+                embedImg(img);
+            });
+            Array.from(mutation.target.querySelectorAll("form")).forEach( form => {
+                fixForm(form);
+            });
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function (event) {
+    observer.observe(window.document.body, {subtree: true, childList: true});
+});
