@@ -122,6 +122,6 @@ def test_multi_page_search(selenium_drivers):
 
     hide_link.click()
 
-    span = selenium.find_element(By.CSS_SELECTOR, "span.highlighted")
+    span = selenium.find_elements(By.CSS_SELECTOR, "span.highlighted")
 
     assert span == []
