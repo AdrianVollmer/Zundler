@@ -105,8 +105,8 @@ https://github.com/AdrianVollmer/Zundler
 <body>{body}
 <script>const zundler_version = "{version}"</script>
 <script>window.globalContext = "{global_context}"</script>
-<script>{pako} \n//# sourceURL=pako.js</script>
-<script>{bootstrap} \n//# sourceURL=zundler_boostrap.js</script>
+<script>{pako}</script>
+<script>{bootstrap}</script>
 </body><!-- {license} --></html>
 """.format(
         style=init_files["init.css"],
