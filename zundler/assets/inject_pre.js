@@ -66,37 +66,21 @@ window.history.replaceState = myReplaceState;
 
 const { fetch: originalFetch } = window;
 
-async function waitFor(predicate, timeout) {
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      if (!predicate()) return;
-      clearInterval(interval);
-      resolve();
-    };
-    const interval = setInterval(check, 100);
-    check();
-
-    if (!timeout) return;
-    setTimeout(() => {
-      clearInterval(interval);
-      reject();
-    }, timeout);
-  });
+function waitForParentResponse(path) {
+    return new Promise((resolve, reject) => {
+        retrieveFileFromParent(path, file => {
+            resolve(file);
+        });
+    });
 }
 
-window.fetch = async (...args) => {
-    // wait until globalContext is ready
-    try {
-        await waitFor(() => window.hasOwnProperty("globalContext"), 10000);
-    } catch (err) {
-        throw err;
-    }
 
+window.fetch = async (...args) => {
     let [resource, config ] = args;
     var path = normalizePath(resource);
     var response;
     if (isVirtual(path)) {
-        var file = retrieveFile(path);
+        var file = await waitForParentResponse(path);
         var data = file.data;
         if (file.base64encoded) {
             data = _base64ToArrayBuffer(data);
@@ -110,6 +94,47 @@ window.fetch = async (...args) => {
 };
 
 
+var retrieveFileFromParent = function(path, callback) {
+    // Get the file into the iframe by messaging the parent document
+    // console.log("Retrieving file from parent: " + path);
+
+    function messageHandler(event) {
+        if (event.data.action === "sendFile" && event.data.argument.path === path) {
+            callback(event.data.argument.file);
+            window.removeEventListener('message', messageHandler);
+        }
+    }
+
+    window.addEventListener('message', messageHandler);
+
+    window.parent.postMessage({
+action: "retrieveFile",
+        argument: {
+            path: path,
+        }
+    }, '*');
+};
+
+
+var embedImgFromParent = function(img) {
+    function setSrc(img, file) {
+        if (mime_type == 'image/svg+xml') {
+            img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
+        } else {
+            img.setAttribute('src', `data:${file.mime_type};base64, ${file.data}`);
+        }
+    };
+
+    if (img.hasAttribute('src')) {
+        const src = img.getAttribute('src');
+        if (isVirtual(src)) {
+            var path = normalizePath(src);
+            retrieveFileFromParent(path, file => setSrc(img, file));
+        };
+    };
+};
+
+
 const observer = new MutationObserver((mutationList) => {
     // console.log("Fix mutated elements...", mutationList);
     mutationList.forEach((mutation) => {
@@ -118,7 +143,7 @@ const observer = new MutationObserver((mutationList) => {
                 fixLink(a);
             });
             Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
-                embedImg(img);
+                embedImgFromParent(img);
             });
             Array.from(mutation.target.querySelectorAll("form")).forEach( form => {
                 fixForm(form);

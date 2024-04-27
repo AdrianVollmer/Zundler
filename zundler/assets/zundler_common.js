@@ -2,19 +2,6 @@
  * Functions that will be needed by several files
  */
 
-var retrieveFile = function(path) {
-    // console.log("Retrieving file: " + path);
-    var fileTree = window.globalContext.fileTree;
-    var file = fileTree[path];
-    if (!file) {
-        console.warn("File not found: " + path);
-        return "";
-    } else {
-        return file;
-    }
-};
-
-
 var isVirtual = function(url) {
     // Return true if the url should be retrieved from the virtual file tree
     var _url = url.toString().toLowerCase();
@@ -68,23 +55,6 @@ var fixForm = function(form) {
     if (isVirtual(href) && form.getAttribute('method').toLowerCase() == 'get') {
         form.setAttribute("onsubmit", "virtualClick(event)");
     }
-};
-
-
-var embedImg = function(img) {
-    if (img.hasAttribute('src')) {
-        const src = img.getAttribute('src');
-        if (isVirtual(src)) {
-            var path = normalizePath(src);
-            const file = retrieveFile(path);
-            const mime_type = file.mime_type;
-            if (mime_type == 'image/svg+xml') {
-                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
-            } else {
-                img.setAttribute('src', `data:${mime_type};base64, ${file.data}`);
-            }
-        };
-    };
 };
 
 

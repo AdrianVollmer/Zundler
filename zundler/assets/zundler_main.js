@@ -1,5 +1,18 @@
 const iFrameId = 'zundler-iframe';
 
+var retrieveFile = function(path) {
+    // console.log("Retrieving file: " + path);
+    var fileTree = window.globalContext.fileTree;
+    var file = fileTree[path];
+    if (!file) {
+        console.warn("File not found: " + path);
+        return "";
+    } else {
+        return file;
+    }
+};
+
+
 var setFavicon = function(href) {
     if (!href) {return;}
     var favicon = document.createElement("link");
@@ -32,6 +45,25 @@ var createIframe = function() {
 }
 
 
+function deepCopyExcept(obj, skipProps) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj;
+    }
+
+    let result = Array.isArray(obj) ? [] : {};
+
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (!skipProps.includes(key)) {
+                result[key] = deepCopyExcept(obj[key], skipProps);
+            }
+        }
+    }
+
+    return result;
+}
+
+
 var prepare = function(html) {
     function unicodeToBase64(string) {
         const utf8EncodedString = unescape(encodeURIComponent(string));
@@ -41,12 +73,18 @@ var prepare = function(html) {
     var parser = new DOMParser();
     var doc = parser.parseFromString(html, "text/html");
 
-    const gcTag = doc.createElement("script");
+    // Insert the global context into the iframe's DOM, but without the file
+    // tree or utils. They are not necessary; the iframe will message the
+    // parent document to retrieve files.
+    //
     // Convert JSON object to b64 because it contain all kinds of
     // problematic characters: `, ", ', &, </script>, ...
     // atob is insufficient, because it only deals with ASCII - we have
     // unicode
-    var serializedGC = unicodeToBase64(JSON.stringify(window.globalContext));
+    const gcTag = doc.createElement("script");
+    const strippedGC = deepCopyExcept(window.globalContext, ["fileTree", "utils"]);
+
+    var serializedGC = unicodeToBase64(JSON.stringify(strippedGC));
 
     gcTag.textContent = `
         function base64ToUnicode(base64String) {
@@ -80,6 +118,23 @@ var prepare = function(html) {
 
     return doc.documentElement.outerHTML;
 }
+
+
+var embedImg = function(img) {
+    if (img.hasAttribute('src')) {
+        const src = img.getAttribute('src');
+        if (isVirtual(src)) {
+            var path = normalizePath(src);
+            const file = retrieveFile(path);
+            const mime_type = file.mime_type;
+            if (mime_type == 'image/svg+xml') {
+                img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
+            } else {
+                img.setAttribute('src', `data:${mime_type};base64, ${file.data}`);
+            }
+        };
+    };
+};
 
 
 var embedJs = function(doc) {
@@ -181,8 +236,20 @@ window.onload = function() {
         if (evnt.data.action == 'ready') {
             hideLoadingIndicator();
 
+        } else if (evnt.data.action == 'retrieveFile') {
+            const path = evnt.data.argument.path;
+            const file = retrieveFile(path);
+            iframe.contentWindow.postMessage({
+                action: "sendFile",
+                argument: {
+                    path: path,
+                    file: file,
+                },
+            }, "*");
+
         } else if (evnt.data.action == 'showMenu') {
             showMenu();
+
         } else if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
             // parent sets the title and responds with the globalContext object
