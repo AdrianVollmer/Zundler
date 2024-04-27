@@ -234,7 +234,11 @@ window.onload = function() {
         var iframe = document.getElementById(iFrameId);
 
         if (evnt.data.action == 'ready') {
+            // iframe is ready
             hideLoadingIndicator();
+            iframe.contentWindow.postMessage({
+                action: "scrollToAnchor",
+            }, "*");
 
         } else if (evnt.data.action == 'retrieveFile') {
             const path = evnt.data.argument.path;
@@ -267,13 +271,6 @@ window.onload = function() {
             if (!loaded) {
                 hideLoadingIndicator();
             }
-
-        } else if (evnt.data.action == 'show_iframe') {
-            // iframe finished fixing the document and is ready to be shown;
-            hideLoadingIndicator();
-            iframe.contentWindow.postMessage({
-                action: "scroll_to_anchor",
-            }, "*");
         }
     }, false);
 

@@ -35,7 +35,7 @@ var virtualClick = function(evnt) {
 };
 
 
-var onScrollToAnchor = function(argument) {
+var onScrollToAnchor = function() {
     if (window.globalContext.anchor) {
         document.location.replace("about:srcdoc#" + window.globalContext.anchor);
     }
@@ -83,7 +83,7 @@ monkeyPatch();
 // Set up message listener
 window.addEventListener("message", (evnt) => {
     console.log("Received message in iframe", evnt);
-    if (evnt.data.action == 'scroll_to_anchor') {
+    if (evnt.data.action == 'scrollToAnchor') {
         onScrollToAnchor(evnt.data.argument);
     }
 }, false);

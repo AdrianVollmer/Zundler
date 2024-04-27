@@ -70,9 +70,28 @@ def test_multi_page(selenium_drivers):
 
     second_link.click()
 
+    selenium.switch_to.parent_frame()
     time.sleep(1)
 
     assert selenium.title.startswith("Second")
+
+    # Check link with anchor
+
+    selenium.switch_to.frame("zundler-iframe")
+
+    third_link = selenium.find_element(
+        By.CSS_SELECTOR, "#second a.internal"
+    )
+
+    third_link.click()
+
+    selenium.switch_to.parent_frame()
+    time.sleep(1)
+    selenium.switch_to.frame("zundler-iframe")
+
+    assert selenium.title.startswith("Third")
+    scroll_height = int(selenium.execute_script("return window.pageYOffset"))
+    assert scroll_height > 1000
 
 
 def test_multi_page_search(selenium_drivers):
