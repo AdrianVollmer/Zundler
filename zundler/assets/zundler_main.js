@@ -211,7 +211,10 @@ var loadVirtualPage = (function (path, get_params, anchor) {
     const data = file.data;
     window.globalContext.getParameters = get_params;
 
-    if (file.mime_type == 'text/html') {
+    // libmagic doesn't properly recognize mimetype of HTMl files that start
+    // with empty lines. It thinks it's javascript. So we also consider the
+    // filename when determining the file type.
+    if (file.mime_type == 'text/html' || path.toLowerCase().endsWith(".html")) {
         window.globalContext.current_path = path;
         window.globalContext.anchor = anchor;
         const html = prepare(data);
