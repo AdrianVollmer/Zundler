@@ -118,7 +118,7 @@ action: "retrieveFile",
 
 var embedImgFromParent = function(img) {
     function setSrc(img, file) {
-        if (mime_type == 'image/svg+xml') {
+        if (file.mime_type == 'image/svg+xml') {
             img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
         } else {
             img.setAttribute('src', `data:${file.mime_type};base64, ${file.data}`);

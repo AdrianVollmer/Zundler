@@ -63,6 +63,10 @@ var normalizePath = function(path) {
     var result = window.globalContext.current_path;
     result = result.split('/');
     result.pop();
+    // path can be a request object
+    if (!(typeof path === 'string' || path instanceof String)) {
+        path = path.href;
+    };
     result = result.concat(path.split('/'));
 
     // resolve relative directories
