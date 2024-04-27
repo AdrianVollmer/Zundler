@@ -1,4 +1,4 @@
-#zundler-iframe {
+#zundler-iframe, #old-zundler-iframe {
     position:fixed;
     top:0; left:0; bottom:0; right:0;
     width:100%;
@@ -19,14 +19,13 @@
   top: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.0);
 }
 
 .lds-ripple {
   display: block;
   position: relative;
   width: 80px;
-  height: 80px;
+  height: 100%;
   margin: auto;
   z-index:1;
   -webkit-transform: translateY(50%);

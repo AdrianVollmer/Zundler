@@ -32,15 +32,12 @@ var setFavicon = function(href) {
 };
 
 
-var createIframe = function() {
-    var iframe = document.getElementById(iFrameId);
-    if (iframe) { iframe.remove() };
-    iframe = document.createElement("iframe");
-    window.document.body.prepend(iframe);
+var createIframe = function(html) {
+    var iframe = document.createElement("iframe");
     iframe.setAttribute('src', '#');
     iframe.setAttribute('name', iFrameId);
     iframe.setAttribute('id', iFrameId);
-    // iframe.style.display = 'none';
+    iframe.setAttribute("srcdoc", html);
     return iframe;
 }
 
@@ -196,20 +193,19 @@ var embedImgs = function(doc) {
 };
 
 
-var loadVirtualPage = (function (path, get_params, anchor) {
+var loadVirtualPage = (function (path, getParams, anchor) {
     // fill the iframe with the new page
     // return True if it worked
     // return False if loading indicator should be removed right away
     const file = window.globalContext.fileTree[path];
-    var iframe = createIframe();
 
     if (!file) {
-        console.error("File not found:", path, get_params, anchor);
+        console.error("File not found:", path, getParams, anchor);
         return false;
     }
 
     const data = file.data;
-    window.globalContext.getParameters = get_params;
+    window.globalContext.getParameters = getParams;
 
     // libmagic doesn't properly recognize mimetype of HTMl files that start
     // with empty lines. It thinks it's javascript. So we also consider the
@@ -218,8 +214,14 @@ var loadVirtualPage = (function (path, get_params, anchor) {
         window.globalContext.current_path = path;
         window.globalContext.anchor = anchor;
         const html = prepare(data);
-        iframe.setAttribute("srcdoc", html);
-        window.history.pushState({path, get_params, anchor}, '', '#');
+        window.history.pushState({path, getParams, anchor}, '', '#');
+
+        var oldIframe = document.getElementById(iFrameId);
+        if (oldIframe) { oldIframe.setAttribute('id', "old-" + iFrameId); };
+
+        var iframe = createIframe(html);
+        window.document.body.append(iframe);
+
         return true;
     } else {
         let blob = new Blob([data], {type: file.mime_type})
@@ -242,6 +244,8 @@ window.onload = function() {
             iframe.contentWindow.postMessage({
                 action: "scrollToAnchor",
             }, "*");
+            var oldIframe = document.getElementById("old-" + iFrameId);
+            if (oldIframe) { oldIframe.remove() };
 
         } else if (evnt.data.action == 'retrieveFile') {
             const path = evnt.data.argument.path;
@@ -265,7 +269,7 @@ window.onload = function() {
 
         } else if (evnt.data.action == 'virtualClick') {
             // user has clicked on a link in the iframe
-            showLoadingIndicator();
+            // showLoadingIndicator();
             var loaded = loadVirtualPage(
                 evnt.data.argument.path,
                 evnt.data.argument.getParameters,
@@ -288,16 +292,12 @@ window.onload = function() {
 
 
 var showLoadingIndicator = function() {
-    var iframe = document.getElementById(iFrameId);
-    iframe.remove()
     var loading = document.getElementById('loading-indicator');
     loading.style.display = '';
 }
 
 
 var hideLoadingIndicator = function() {
-    var iframe = document.getElementById(iFrameId);
-    iframe.style.display = '';
     var loading = document.getElementById('loading-indicator');
     loading.style.display = 'none';
 }
