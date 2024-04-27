@@ -233,7 +233,7 @@ var loadVirtualPage = (function (path, get_params, anchor) {
 window.onload = function() {
     // Set up message listener
     window.addEventListener("message", (evnt) => {
-        console.log("Received message in parent", evnt);
+        console.log("Received message in parent", evnt.data);
         var iframe = document.getElementById(iFrameId);
 
         if (evnt.data.action == 'ready') {
