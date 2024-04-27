@@ -246,6 +246,7 @@ window.onload = function() {
             }, "*");
             var oldIframe = document.getElementById("old-" + iFrameId);
             if (oldIframe) { oldIframe.remove() };
+            iframe.contentWindow.document.body.focus();
 
         } else if (evnt.data.action == 'retrieveFile') {
             const path = evnt.data.argument.path;
