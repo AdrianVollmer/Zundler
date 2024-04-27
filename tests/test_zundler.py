@@ -144,3 +144,13 @@ def test_multi_page_search(selenium_drivers):
     span = selenium.find_elements(By.CSS_SELECTOR, "span.highlighted")
 
     assert span == []
+
+
+def test_dark_mode(selenium_drivers):
+    path = Path("//mnt//dark-mode//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
+    selenium.get(path.as_uri())
+
+    time.sleep(1)
+
+    assert "dark-mode documentation" in selenium.title
