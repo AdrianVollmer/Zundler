@@ -66,11 +66,11 @@ def run_make_commands(request):
     # Get the directory of the current test file
     test_dir = request.fspath.dirname
     cmd = """
-    uv venv && \\
-    . .venv/bin/activate && \\
+    ( cd .. ; uv venv ) && \\
+    . ../.venv/bin/activate && \\
     uv pip install -r requirements.txt && \\
     rm -rf _build && \\
-    .venv/bin/sphinx-build -M zundler . _build
+    ../.venv/bin/sphinx-build -M zundler . _build
 """
 
     for d in ["copy-button", "mermaid", "multi-page", "dark-mode"]:
