@@ -2,6 +2,18 @@
  * Functions that will be needed by several files
  */
 
+var _base64ToArrayBuffer = function (base64) {
+    if (!base64) { return []}
+    var binary_string = window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+};
+
+
 var isVirtual = function(url) {
     // Return true if the url should be retrieved from the virtual file tree
     var _url = url.toString().toLowerCase();

@@ -75,3 +75,58 @@
     opacity: 0;
   }
 }
+
+.zundler-popup {
+    display: none;
+    position: fixed;
+    left: 10%;
+    top: 10%;
+    width: 80%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+.zundler-popup-sidebar {
+    float: left;
+    width: 20%;
+    height: 100%;
+    background-color: #f9f9f9;
+    padding: 10px;
+    box-sizing: border-box;
+    border-right: 1px solid #ccc;
+}
+
+
+.zundler-popup-content {
+    float: left;
+    width: 80%;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.content-frame {
+    padding-bottom: 1.5em;
+    height: 95%;
+}
+
+.content-section {
+    overflow-y: auto;
+    height: 100%;
+    margin-top: 1.5em;
+}
+
+.zundler-popup-close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background: none;
+    font-size: 24px;
+    cursor: pointer;
+}

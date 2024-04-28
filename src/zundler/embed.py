@@ -103,6 +103,7 @@ https://github.com/AdrianVollmer/Zundler
 <html>
 <head><style>{style}</style></head>
 <body>{body}
+<script>const zundler_version = "{version}"</script>
 <script>window.globalContext = "{global_context}"</script>
 <script>{pako} \n//# sourceURL=pako.js</script>
 <script>{bootstrap} \n//# sourceURL=zundler_boostrap.js</script>

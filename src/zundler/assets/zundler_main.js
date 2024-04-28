@@ -260,7 +260,7 @@ window.onload = function() {
             }, "*");
 
         } else if (evnt.data.action == 'showMenu') {
-            showMenu();
+            showPopup();
 
         } else if (evnt.data.action == 'set_title') {
             // iframe has finished loading and sent us its title
@@ -303,12 +303,112 @@ var hideLoadingIndicator = function() {
     loading.style.display = 'none';
 }
 
-function showMenu() {
-    // TODO show the menu containing info and functions
-}
-
 document.addEventListener('keyup', function (event) {
     if (event.key == "Z" && event.ctrlKey){
-        showMenu();
+        showPopup();
     }
+});
+
+/***** Code for the popup menu *****/
+
+function showPopup() {
+    document.getElementById('zundler-popup').style.display = 'block';
+}
+
+function hidePopup() {
+    document.getElementById('zundler-popup').style.display = 'none';
+}
+
+function fromHTML(html, trim = true) {
+  html = trim ? html.trim() : html;
+  if (!html) return null;
+  const template = document.createElement('template');
+  template.innerHTML = html;
+  const result = template.content.children;
+  if (result.length === 1) return result[0];
+  return result;
+}
+
+function setUpPopup() {
+    const popupHTML = `
+    <div id="zundler-popup" class="zundler-popup">
+        <div class="zundler-popup-sidebar">
+            <h3>Zundler</h3>
+            <ul>
+                <li><a href="#" data-target="info">Info</a>
+                <li><a href="#" data-target="file-tree">Embedded Files</a>
+            </ul>
+        </div>
+        <div class="zundler-popup-content">
+            <button class="zundler-popup-close-btn" onclick="hidePopup()">
+    <svg fill="#000000" height="1em" width="1em" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve"> <g> <g> <polygon points="512,59.076 452.922,0 256,196.922 59.076,0 0,59.076 196.922,256 0,452.922 59.076,512 256,315.076 452.922,512 512,452.922 315.076,256"/> </g> </g> </svg>
+            </button>
+            <div class="content-frame">
+                <div id="content-info" class="content-section">
+                    <h1>Zundler</h1>
+                    <p>This file has been prepared using <a target="_blank" title="Zundler" href="https://github.com/AdrianVollmer/Zundler">Zundler</a>.</p>
+                    <p>Version: ${zundler_version}</p>
+                </div>
+                <div id="content-file-tree" class="content-section">
+                    <h1>Embedded Files</h1>
+                    <div id="file-tree"><ul></ul></div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    const popup = fromHTML(popupHTML);
+
+    // Set visibility of content
+    popup.querySelectorAll('.content-section').forEach((div, i) => {
+        if (i > 0) { div.style.display = 'none'; }
+    });
+
+    // Set up events
+    popup.querySelectorAll(".zundler-popup-sidebar li a").forEach(a => {
+        a.addEventListener("click", e => {
+            const target = e.target.dataset.target;
+            // Hide all content divs
+            document.querySelectorAll('.content-section').forEach(div => {
+                div.style.display = 'none';
+            });
+
+            // Show the selected content div
+            document.getElementById("content-" + target).style.display = 'block';
+        });
+    });
+
+    for (const [path, file] of Object.entries(window.globalContext.fileTree)) {
+        const listitem = document.createElement("li");
+        const link = document.createElement("a");
+        listitem.append(link);
+        link.setAttribute("href", "#");
+        link.addEventListener("click", e => downloadVirtualFile(path));
+        link.innerText = path;
+        popup.querySelector("#file-tree ul").append(listitem);
+    };
+
+    document.body.append(popup);
+}
+
+async function downloadVirtualFile(path) {
+    const file = retrieveFile(path);
+    var data;
+    if (file.base64encoded) {
+        data = _base64ToArrayBuffer(file.data);
+    } else {
+        data = file.data;
+    }
+    let blob = new Blob([data], {type: file.mime_type})
+    var url = URL.createObjectURL(blob)
+    // var myWindow = window.open(url, "_blank");
+    // Create link and click it so file is downloaded
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    var fileName = path;
+    link.download = fileName;
+    link.click();
+}
+
+document.addEventListener('DOMContentLoaded', function (event) {
+    setUpPopup();
 });
