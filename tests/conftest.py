@@ -25,13 +25,14 @@ def docker_compose_command() -> str:
 
 def is_responsive(port):
     import socket
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('127.0.0.1',port))
+        result = sock.connect_ex(("127.0.0.1", port))
         if result == 0:
-           return True
+            return True
         else:
-           return False
+            return False
         sock.close()
     except Exception:
         return False
@@ -50,7 +51,7 @@ def selenium_drivers(docker_ip, docker_services):
 
         options = webdriver.FirefoxOptions()
         drivers[browser] = webdriver.Remote(
-            command_executor=f'http://localhost:4444/wd/hub',
+            command_executor=f"http://localhost:4444/wd/hub",
             options=options,
         )
 

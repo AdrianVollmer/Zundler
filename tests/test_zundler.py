@@ -79,9 +79,7 @@ def test_multi_page(selenium_drivers):
 
     selenium.switch_to.frame("zundler-iframe")
 
-    third_link = selenium.find_element(
-        By.CSS_SELECTOR, "#second a.internal"
-    )
+    third_link = selenium.find_element(By.CSS_SELECTOR, "#second a.internal")
 
     third_link.click()
 
