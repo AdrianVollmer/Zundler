@@ -114,4 +114,4 @@ Some demo documents are available here:
 Copyright
 ---------
 
-Adrian Vollmer, 2022. MIT licensed; see `LICENSE` for details.
+Adrian Vollmer, 2022-2024. MIT licensed; see `LICENSE` for details.
