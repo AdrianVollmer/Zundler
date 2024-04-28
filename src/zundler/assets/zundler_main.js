@@ -345,7 +345,7 @@ function setUpPopup() {
             </button>
             <div class="content-frame">
                 <div id="content-info" class="content-section">
-                    <h1>Zundler</h1>
+                    <h1>Info</h1>
                     <p>This file has been prepared using <a target="_blank" title="Zundler" href="https://github.com/AdrianVollmer/Zundler">Zundler</a>.</p>
                     <p>Version: ${zundler_version}</p>
                 </div>
