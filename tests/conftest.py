@@ -51,7 +51,7 @@ def selenium_drivers(docker_ip, docker_services):
 
         options = webdriver.FirefoxOptions()
         drivers[browser] = webdriver.Remote(
-            command_executor=f"http://localhost:4444/wd/hub",
+            command_executor="http://localhost:4444/wd/hub",
             options=options,
         )
 
@@ -73,5 +73,5 @@ def run_make_commands(request):
     .venv/bin/sphinx-build -M zundler . _build
 """
 
-    for d in ["copy-button", "mermaid", "multi-page"]:
+    for d in ["copy-button", "mermaid", "multi-page", "dark-mode"]:
         subprocess.run(cmd.strip(), shell=True, check=True, cwd=Path(test_dir) / d)
