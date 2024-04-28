@@ -1,6 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.2"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
 
 [project]
 name = "zundler"
@@ -32,18 +32,27 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.optional-dependencies]
+tests = [
+    'pytest>=8',
+    'selenium',
+    'pytest-selenium',
+    'pytest-docker',
+    'black',
+    'nox',
+]
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "_version.py"
+
 [project.entry-points]
 "sphinx.builders" = {zundler = "zundler.sphinxext"}
 
 [project.scripts]
 zundler = "zundler.__main__:main"
-
-[tool.setuptools]
-zip-safe = false
-include-package-data = true
-
-[tool.setuptools.packages]
-find = {namespaces = false}
 
 [tool.mypy]
 python_version = "3.8"
@@ -54,16 +63,6 @@ follow_imports = "skip"
 incremental = true
 check_untyped_defs = true
 warn_unused_ignores = true
-
-[project.optional-dependencies]
-tests = [
-    'pytest>=8',
-    'selenium',
-    'pytest-selenium',
-    'pytest-docker',
-    'black',
-    'nox',
-]
 
 [tool.pytest.ini_options]
 minversion = "6.0"

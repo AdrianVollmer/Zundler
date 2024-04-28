@@ -1,48 +1,16 @@
-*.py[cod]
+*.pyc
+__pycache__/
 
-# C extensions
-*.so
+.venv/
+venv/
 
-# Packages
-*.egg*
-*.egg-info
-dist
-build
-eggs
-parts
-bin
-var
-sdist
-develop-eggs
-.installed.cfg
-lib
-lib64
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-cover/
-.coverage*
-.tox
-.venv
-.pytest_cache/
-.mypy_cache/
-
-# Translations
-*.mo
-
-# Complexity
-output/*.html
-output/*/index.html
-
-# Editors
-*~
-.*.swp
-.*sw?
-
-# Sphinx
+_version.py
 _build
 
-# Other
+build
+dist
+*.egg-info
+.nox
+.pytest_cache/
+
 _download

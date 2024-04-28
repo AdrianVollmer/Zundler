@@ -10,5 +10,5 @@ def tests(session):
 @nox.session()
 def black(session):
     session.install(".[tests]")
-    session.run("black", "zundler", "--check", *session.posargs)
+    session.run("black", "src", "--check", *session.posargs)
     session.run("black", "tests", "--check", *session.posargs)
