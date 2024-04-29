@@ -26,9 +26,7 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
             self.app.original_outdir
         )
 
-    def finish(self):
-        super().finish()
-
+    def run_zundler(self):
         from zundler.embed import embed_assets
 
         root_doc = self.config.zundler_root_doc
@@ -52,6 +50,10 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
                 append_pre=self.config.zundler_append_pre,
                 append_post=self.config.zundler_append_post,
             )
+
+
+def run_zundler(app, exception):
+    app.builder.run_zundler()
 
 
 def setup(app):
@@ -93,6 +95,10 @@ def setup(app):
     )
 
     app.add_builder(ZundlerBuilder)
+
+    # This should run as the last function in the build-finished event
+    # Set a high priority and hope nothing is higher
+    app.connect("build-finished", run_zundler, priority=2**32)
 
     return {
         "version": "0.1",
