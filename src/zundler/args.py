@@ -30,12 +30,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "-R",
-    "--revert",
+    "-x",
+    "--extract",
     default=False,
     action="store_true",
-    help="set this flag for the reverse operation: deflate a Zundler file"
-    ' into its components (ouput_path must be a directory; "." by default)',
+    help='extract files from a Zundler file (ouput_path must be a directory; "." by default)',
 )
 
 parser.add_argument(

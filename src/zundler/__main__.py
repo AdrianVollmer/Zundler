@@ -5,7 +5,7 @@ def main():
 
     from .embed import embed_assets, extract_assets
 
-    if args.revert:
+    if args.extract:
         extract_assets(
             args.input_path,
             output_path=args.output_path,

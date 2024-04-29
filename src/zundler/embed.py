@@ -324,7 +324,7 @@ def extract_assets(input_path, output_path=None):
         blob = base64.b64decode(blob)
         blob = zlib.decompress(blob).decode()
         blob = json.loads(blob)
-        file_tree = blob["file_tree"]
+        file_tree = blob["fileTree"]
     except Exception as e:
         logger.error(str(e))
         logger.error("Does not look like a Zundler output file: %s" % input_path)
