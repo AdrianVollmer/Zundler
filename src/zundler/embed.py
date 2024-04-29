@@ -96,8 +96,9 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
     result = """
 <!DOCTYPE html>
 <!--
-This document has been prepared using Zundler {version}. You can use zundler to
-inspect the files embedded below: `zundler -R <file>`
+This document has been prepared using Zundler {version}.
+You can use zundler to inspect the files embedded below: `zundler -x <file>`
+Alternatively, press CTRL-Shift-Z.
 https://github.com/AdrianVollmer/Zundler
 -->
 <html>
