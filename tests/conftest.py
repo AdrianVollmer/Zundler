@@ -73,5 +73,7 @@ def run_make_commands(request):
     ../.venv/bin/sphinx-build -M zundler . _build
 """
 
-    for d in ["copy-button", "mermaid", "multi-page", "dark-mode"]:
+    for d in [
+        "copy-button", "mermaid", "multi-page", "dark-mode", "dark-listing"
+    ]:
         subprocess.run(cmd.strip(), shell=True, check=True, cwd=Path(test_dir) / d)
