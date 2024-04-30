@@ -1,3 +1,6 @@
 .eggs
 build
+dist
 tests
+_download
+_version.py
