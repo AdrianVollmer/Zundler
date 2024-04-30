@@ -67,10 +67,9 @@ var monkeyPatch = function() {
     jQuery.ajax = function(settings) {
         url = normalizePath(settings.url);
         if (isVirtual(url)) {
-            var result;
-            var data;
-            data = retrieveFile(url);
-            result = settings.complete({responseText: data}, "");
+            retrieveFile(url, file => {
+                settings.complete({responseText: file.data}, "");
+            });
             return; // Return value not actually needed in searchtools.js
         } else {
             return jQuery.ajax(settings);
@@ -92,11 +91,20 @@ window.parent.postMessage({
     action: "ready",
 }, '*');
 
-
 document.addEventListener('keyup', function (event) {
     if (event.key == "Z" && event.ctrlKey){
         window.parent.postMessage({
             action: "showMenu",
         }, '*');
     }
+});
+
+document.addEventListener('DOMContentLoaded', function (event) {
+    // Look for fixable nodes because scripts may have altered the DOM with
+    // document.write()
+    embedJs(document);
+    embedCss(document);
+    embedImgs(document);
+    fixLinks(document);
+    fixForms(document);
 });

@@ -74,6 +74,11 @@ def run_make_commands(request):
 """
 
     for d in [
-        "copy-button", "mermaid", "multi-page", "dark-mode", "dark-listing"
+        "copy-button",
+        "mermaid",
+        "multi-page",
+        "dark-mode",
+        "dark-listing",
+        "pydata-theme",
     ]:
         subprocess.run(cmd.strip(), shell=True, check=True, cwd=Path(test_dir) / d)

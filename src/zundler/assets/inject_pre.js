@@ -56,7 +56,7 @@ const { fetch: originalFetch } = window;
 
 function waitForParentResponse(path) {
     return new Promise((resolve, reject) => {
-        retrieveFileFromParent(path, file => {
+        retrieveFile(path, file => {
             resolve(file);
         });
     });
@@ -82,28 +82,6 @@ window.fetch = async (...args) => {
 };
 
 
-var retrieveFileFromParent = function(path, callback) {
-    // Get the file into the iframe by messaging the parent document
-    // console.log("Retrieving file from parent: " + path);
-
-    function messageHandler(event) {
-        if (event.data.action === "sendFile" && event.data.argument.path === path) {
-            callback(event.data.argument.file);
-            window.removeEventListener('message', messageHandler);
-        }
-    }
-
-    window.addEventListener('message', messageHandler);
-
-    window.parent.postMessage({
-action: "retrieveFile",
-        argument: {
-            path: path,
-        }
-    }, '*');
-};
-
-
 var embedImgFromParent = function(img) {
     function setSrc(img, file) {
         if (file.mime_type == 'image/svg+xml') {
@@ -117,7 +95,7 @@ var embedImgFromParent = function(img) {
         const src = img.getAttribute('src');
         if (isVirtual(src)) {
             var path = normalizePath(src);
-            retrieveFileFromParent(path, file => setSrc(img, file));
+            retrieveFile(path, file => setSrc(img, file));
         };
     };
 };

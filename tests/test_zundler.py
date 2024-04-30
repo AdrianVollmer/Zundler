@@ -152,3 +152,19 @@ def test_dark_mode(selenium_drivers):
     time.sleep(1)
 
     assert "dark-mode documentation" in selenium.title
+
+
+def test_pydata_theme(selenium_drivers):
+    path = Path("//mnt//pydata-theme//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
+    selenium.get(path.as_uri())
+
+    time.sleep(1)
+
+    assert "pydata-theme documentation" in selenium.title
+
+    selenium.switch_to.frame("zundler-iframe")
+
+    logo = selenium.find_element(By.CSS_SELECTOR, "img.logo__image.only-dark")
+
+    assert logo.get_attribute("src").startswith("data:image/svg+xml;")
