@@ -34,7 +34,7 @@ parser.add_argument(
     "--extract",
     default=False,
     action="store_true",
-    help='extract files from a Zundler file (ouput_path must be a directory; "." by default)',
+    help='extract files from a Zundler file (output_path must be a directory; "." by default)',
 )
 
 parser.add_argument(
