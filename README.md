@@ -76,6 +76,24 @@ If you prefer an alternative like `pipx`, `poetry` or manually handled
 An entry point called `zundler` will appear in `~/.local/bin`.
 
 
+Building from source
+------------
+
+Install `hatch` by
+
+`pip install hatch`
+
+Then run
+
+`make clean`
+`make build`
+
+Move into the `dist` folder
+
+`pip install zundler-yourproducedfilename.whl`
+
+
+
 Bundling Sphinx docs
 --------------------
 
