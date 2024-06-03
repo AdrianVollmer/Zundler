@@ -20,6 +20,7 @@ import base64
 from fnmatch import fnmatch
 import json
 import logging
+import mimetypes
 import os
 from pathlib import Path
 import re
@@ -138,7 +139,9 @@ def prepare_file(filename):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, "rb").read()
-    mime_type = mime_type_from_bytes(filename, data)
+    mime_type, _ = mimetypes.guess_type(filename)
+    if not mime_type:
+        mime_type = mime_type_from_bytes(filename, data)
     base64encoded = False
 
     if ext == "css":
