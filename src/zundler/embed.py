@@ -31,7 +31,7 @@ except ImportError as e:
     logger = logging.getLogger(__name__)
     logger.error(str(e))
     logger.warning("Using `mimetypes` instead of `python-magic` for mime type guessing")
-    import mimetypes
+    magic = None
 
 from zundler.args import __version__
 
@@ -135,9 +135,7 @@ def prepare_file(filename):
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
     data = open(filename, "rb").read()
-    mime_type, _ = mimetypes.guess_type(filename)
-    if not mime_type:
-        mime_type = mime_type_from_bytes(filename, data)
+    mime_type = get_mime_type(filename, data)
     base64encoded = False
 
     if ext == "css":
@@ -254,7 +252,7 @@ def embed_css_resources(css, filename):
             mime_type = "text/css"
             content = embed_css_resources(content, filename)
         else:
-            mime_type = mime_type_from_bytes(filename, content)
+            mime_type = get_mime_type(filename, content)
         if not mime_type:
             logger.error("Unable to determine mime type: %s" % path)
             mime_type = "application/octet-stream"
@@ -274,11 +272,11 @@ def embed_css_resources(css, filename):
     return css
 
 
-def mime_type_from_bytes(filename, buffer):
-    try:
+def get_mime_type(filename, buffer):
+    mime_type, _ = mimetypes.guess_type(filename)
+
+    if not mime_type and magic:
         mime_type = magic.Magic(mime=True).from_buffer(buffer)
-    except NameError:
-        mime_type = mimetypes.guess_type(filename)[0]
 
     if not mime_type:
         logger.error(
