@@ -46,7 +46,7 @@ def selenium_drivers(docker_ip, docker_services):
     for browser in ["firefox"]:
         port = docker_services.port_for(browser, 5900)
         docker_services.wait_until_responsive(
-            timeout=30.0, pause=0.1, check=lambda: is_responsive(port)
+            timeout=10.0, pause=0.1, check=lambda: is_responsive(port)
         )
 
         options = webdriver.FirefoxOptions()
