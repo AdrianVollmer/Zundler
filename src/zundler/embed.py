@@ -1,11 +1,10 @@
 """
 Embed HTML assets.
 
-It creates an HTML file that has three script tags:
+It creates an HTML file that has these script tags:
 
 1. A virtual file tree containing all assets in zipped form
-2. The pako JS library to unzip the assets
-3. Some boostrap code that fixes the HTML so it loads all assets from the
+2. Some boostrap code that fixes the HTML so it loads all assets from the
 virtual file tree instead of the file system
 
 Also, two scripts are injected into all HTML files in the file tree. One as
@@ -51,7 +50,6 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
         "zundler_main.js",
         "inject_pre.js",
         "inject_post.js",
-        "pako.min.js",
         "LICENSE",
     ]:
         path = os.path.join(SCRIPT_PATH, "assets", filename)
@@ -107,13 +105,11 @@ https://github.com/AdrianVollmer/Zundler
 <body>{body}
 <script>const zundler_version = "{version}"</script>
 <script>window.globalContext = "{global_context}"</script>
-<script>{pako}</script>
 <script>{bootstrap}</script>
 </body><!-- {license} --></html>
 """.format(
         style=init_files["init.css"],
         body=init_files["init.html"],
-        pako=init_files["pako.min.js"],
         bootstrap=init_files["zundler_bootstrap.js"],
         global_context=global_context,
         license=init_files["LICENSE"],

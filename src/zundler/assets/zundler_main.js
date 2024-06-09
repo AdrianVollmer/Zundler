@@ -143,7 +143,9 @@ var loadVirtualPage = (function (path, getParams, anchor) {
 });
 
 
-window.onload = function() {
+function main() {
+    setUpPopup();
+
     // Set up message listener
     window.addEventListener("message", (evnt) => {
         console.log("Received message in parent", evnt.data);
@@ -215,12 +217,6 @@ var hideLoadingIndicator = function() {
     loading.style.display = 'none';
 }
 
-document.addEventListener('keyup', function (event) {
-    if (event.key == "Z" && event.ctrlKey){
-        showPopup();
-    }
-});
-
 /***** Code for the popup menu *****/
 
 function showPopup() {
@@ -242,6 +238,12 @@ function fromHTML(html, trim = true) {
 }
 
 function setUpPopup() {
+    document.addEventListener('keyup', function (event) {
+        if (event.key == "Z" && event.ctrlKey){
+            showPopup();
+        }
+    });
+
     const popupHTML = `
     <div id="zundler-popup" class="zundler-popup">
         <div class="zundler-popup-sidebar">
@@ -322,6 +324,4 @@ async function downloadVirtualFile(path) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function (event) {
-    setUpPopup();
-});
+main()

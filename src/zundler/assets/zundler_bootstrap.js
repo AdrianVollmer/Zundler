@@ -1,21 +1,24 @@
-var _base64ToArrayBuffer = function (base64) {
-    if (!base64) { return []}
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
+const decompress = async (url) => {
+  const ds = new DecompressionStream('deflate');
+  const response = await fetch(url);
+  const blob_in = await response.blob();
+  const stream_in = blob_in.stream().pipeThrough(ds);
+  const result = await new Response(stream_in);
+  return await result;
 };
 
+decompress(
+  'data:application/octet-stream;base64,' + window.globalContext
+).then((response) => response.json()
+).then((result) => {
+    console.log(result)
+    window.globalContext = result;
+    const script_common = document.createElement("script");
+    script_common.textContent = window.globalContext.utils.zundler_common;
+    document.body.append(script_common);
 
-// Set up the virtual file tree
-var GC = window.globalContext;
-GC = _base64ToArrayBuffer(GC);
-GC = pako.inflate(GC);
-GC = new TextDecoder("utf-8").decode(GC);
-GC = JSON.parse(GC);
-window.globalContext = GC;
-eval(window.globalContext.utils.zundler_common);
-eval(window.globalContext.utils.zundler_main);
+    const script_main = document.createElement("script");
+    script_main.textContent = window.globalContext.utils.zundler_main;
+    document.body.append(script_main);
+});
+

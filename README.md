@@ -30,7 +30,6 @@ by taking the following approach:
   <head><style>{style}</style></head>
   <body>{body}
   <script>window.global_context = {zipped_global_context}</script>
-  <script>{pako} //# sourceURL=pako.js</script>
   <script>{init_js} //# sourceURL=init.js</script>
   </body></html>
   ```
