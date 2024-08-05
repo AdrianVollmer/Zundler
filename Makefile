@@ -13,7 +13,7 @@ endef
 
 define create_venv =
 	if [ ! -d $(DOWNLOAD)/$(1)/venv ] ; then \
-		python3 -m venv $(DOWNLOAD)/$(1)/venv ; \
+		uv venv $(DOWNLOAD)/$(1)/venv ; \
 	fi
 endef
 
@@ -24,7 +24,7 @@ define prepare =
 	$(call clone_repo,$(1),$(2))
 	$(call create_venv,$(2))
 	. $(DOWNLOAD)/$(2)/venv/bin/activate ; \
-	pip install git+file:////$(ROOT_DIR)@$(REF)
+	uv pip install git+file:////$(ROOT_DIR)@$(REF)
 endef
 
 
@@ -40,7 +40,7 @@ $(OUTPUT)/sphinx.html: Makefile
 	NAME=sphinx ; \
 	DOCS=doc ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install $(DOWNLOAD)/$$NAME[docs] ; \
+	uv pip install $(DOWNLOAD)/$$NAME[docs] ; \
 	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
@@ -53,7 +53,7 @@ $(OUTPUT)/cpython.html: Makefile
 	NAME=cpython ; \
 	DOCS=Doc ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install -r $(DOWNLOAD)/$$NAME/$$DOCS/requirements.txt ; \
+	uv pip install -r $(DOWNLOAD)/$$NAME/$$DOCS/requirements.txt ; \
 	make -C $(DOWNLOAD)/$$NAME/$$DOCS BUILDER=zundler SPHINXOPTS='-D zundler_root_doc=index' build ; \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/build/zundler/index.html $(OUTPUT)/$$NAME.html
 
@@ -66,7 +66,7 @@ $(OUTPUT)/myst-parser.html: Makefile
 	NAME=myst-parser ; \
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate ; \
-	pip install $(DOWNLOAD)/$$NAME[linkify,rtd] ; \
+	uv pip install $(DOWNLOAD)/$$NAME[linkify,rtd] ; \
 	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler ; \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
@@ -80,8 +80,8 @@ $(OUTPUT)/flask.html: Makefile
 	NAME=flask ; \
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
-	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
-	pip install -e $(DOWNLOAD)/$$NAME && \
+	uv pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
+	uv pip install -e $(DOWNLOAD)/$$NAME && \
 	make -C $(DOWNLOAD)/$$NAME/$$DOCS zundler SPHINXOPTS='-D zundler_append_post="window.addEventListener(\"load\", function(){window.document.querySelector(\"#searchbox\").style.display=\"\"});"' && \
 	cp $(DOWNLOAD)/$$NAME/$$DOCS/_build/zundler/index.html $(OUTPUT)/$$NAME.html
 
@@ -94,7 +94,7 @@ $(OUTPUT)/setuptools.html: Makefile
 	NAME=setuptools ; \
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
-	pip install -e $(DOWNLOAD)/$$NAME[docs] && \
+	uv pip install -e $(DOWNLOAD)/$$NAME[docs] && \
 	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
 	sphinx-build -b zundler . _build/zundler && \
 	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
@@ -108,7 +108,8 @@ $(OUTPUT)/readthedocs.html: Makefile
 	NAME=readthedocs.org ; \
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
-	pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
+	zundler --version ; exit ; \
+	uv pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
 	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
 	sphinx-build -b zundler . _build/zundler && \
 	cp _build/zundler/index.html $(OUTPUT)/$$NAME.html
