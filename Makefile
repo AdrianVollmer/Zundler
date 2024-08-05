@@ -24,7 +24,7 @@ define prepare =
 	$(call clone_repo,$(1),$(2))
 	$(call create_venv,$(2))
 	. $(DOWNLOAD)/$(2)/venv/bin/activate ; \
-	uv pip install 'zundler @ git+file:////$(ROOT_DIR)@$(REF)'
+	uv pip install --upgrade 'zundler @ git+file:////$(ROOT_DIR)@$(REF)'
 endef
 
 
