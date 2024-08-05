@@ -18,25 +18,25 @@
 
 const originalGet = URLSearchParams.prototype.get;
 
-var myGet = function (arg) {
-    // If searchtools.js of sphinx is used
-    if (
-        window.globalContext &&
-        window.globalContext.getParameters &&
-        (window.location.search === "") &&
-        (Array.from(this.entries()).length == 0)
-    ) {
-        const params = new URLSearchParams('?' + window.globalContext.getParameters);
-        const result = params.get(arg);
-        // console.log("Return virtual get parameter:", arg, result);
-        return result;
-    } else {
-        const originalResult = originalGet.apply(this, [arg]);
-        return originalResult;
-    }
+const myGet = function (arg) {
+	// If searchtools.js of sphinx is used
+	if (
+		window.globalContext?.getParameters &&
+		window.location.search === "" &&
+		Array.from(this.entries()).length === 0
+	) {
+		const params = new URLSearchParams(
+			`?${window.globalContext.getParameters}`,
+		);
+		const result = params.get(arg);
+		// console.log("Return virtual get parameter:", arg, result);
+		return result;
+	}
+	const originalResult = originalGet.apply(this, [arg]);
+	return originalResult;
 };
 
-var myDelete = function (arg) {};
+const myDelete = (arg) => {};
 
 URLSearchParams.prototype.get = myGet;
 URLSearchParams.prototype.delete = myDelete;
@@ -45,7 +45,7 @@ URLSearchParams.prototype.delete = myDelete;
  * Monkeypatch window.history
  */
 
-var myReplaceState = function (arg1, arg2, arg3) {};
+const myReplaceState = (arg1, arg2, arg3) => {};
 window.history.replaceState = myReplaceState;
 
 /*
@@ -55,69 +55,69 @@ window.history.replaceState = myReplaceState;
 const { fetch: originalFetch } = window;
 
 function waitForParentResponse(path) {
-    return new Promise((resolve, reject) => {
-        retrieveFile(path, file => {
-            resolve(file);
-        });
-    });
+	return new Promise((resolve, reject) => {
+		retrieveFile(path, (file) => {
+			resolve(file);
+		});
+	});
 }
 
-
 window.fetch = async (...args) => {
-    let [resource, config ] = args;
-    var path = normalizePath(resource);
-    var response;
-    if (isVirtual(path)) {
-        var file = await waitForParentResponse(path);
-        var data = file.data;
-        if (file.base64encoded) {
-            data = _base64ToArrayBuffer(data);
-        }
-        response = new Response(data);
-        response.headers.set("content-type", file.mime_type);
-    } else {
-        response = await originalFetch(resource, config);
-    }
-    return response;
+	const [resource, config] = args;
+	const path = normalizePath(resource);
+	let response;
+	if (isVirtual(path)) {
+		const file = await waitForParentResponse(path);
+		let data = file.data;
+		if (file.base64encoded) {
+			data = _base64ToArrayBuffer(data);
+		}
+		response = new Response(data);
+		response.headers.set("content-type", file.mime_type);
+	} else {
+		response = await originalFetch(resource, config);
+	}
+	return response;
 };
 
+const embedImgFromParent = (img) => {
+	function setSrc(img, file) {
+		if (file.mime_type === "image/svg+xml") {
+			img.setAttribute(
+				"src",
+				`data:image/svg+xml;charset=utf-8;base64, ${btoa(file.data)}`,
+			);
+		} else {
+			img.setAttribute("src", `data:${file.mime_type};base64, ${file.data}`);
+		}
+	}
 
-var embedImgFromParent = function(img) {
-    function setSrc(img, file) {
-        if (file.mime_type == 'image/svg+xml') {
-            img.setAttribute('src', "data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data));
-        } else {
-            img.setAttribute('src', `data:${file.mime_type};base64, ${file.data}`);
-        }
-    };
-
-    if (img.hasAttribute('src')) {
-        const src = img.getAttribute('src');
-        if (isVirtual(src)) {
-            var path = normalizePath(src);
-            retrieveFile(path, file => setSrc(img, file));
-        };
-    };
+	if (img.hasAttribute("src")) {
+		const src = img.getAttribute("src");
+		if (isVirtual(src)) {
+			const path = normalizePath(src);
+			retrieveFile(path, (file) => setSrc(img, file));
+		}
+	}
 };
-
 
 const observer = new MutationObserver((mutationList) => {
-    // console.log("Fix mutated elements...", mutationList);
-    mutationList.forEach((mutation) => {
-        if (mutation.type == 'childList') {
-            Array.from(mutation.target.querySelectorAll("a")).forEach( a => {
-                fixLink(a);
-            });
-            Array.from(mutation.target.querySelectorAll("img")).forEach( img => {
-                embedImgFromParent(img);
-            });
-            Array.from(mutation.target.querySelectorAll("form")).forEach( form => {
-                fixForm(form);
-            });
-        }
-    });
+	// console.log("Fix mutated elements...", mutationList);
+	for (const mutation of mutationList) {
+		if (mutation.type === "childList") {
+			for (const a of Array.from(mutation.target.querySelectorAll("a"))) {
+				fixLink(a);
+			}
+			for (const img of Array.from(mutation.target.querySelectorAll("img"))) {
+				embedImgFromParent(img);
+			}
+			for (const form of Array.from(mutation.target.querySelectorAll("form"))) {
+				fixForm(form);
+			}
+		}
+	}
 });
 
-document.addEventListener('DOMContentLoaded', function (event) {
-    observer.observe(window.document.body, {subtree: true, childList: true});
+document.addEventListener("DOMContentLoaded", (event) => {
+	observer.observe(window.document.body, { subtree: true, childList: true });
 });
