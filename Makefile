@@ -24,7 +24,7 @@ define prepare =
 	$(call clone_repo,$(1),$(2))
 	$(call create_venv,$(2))
 	. $(DOWNLOAD)/$(2)/venv/bin/activate ; \
-	uv pip install git+file:////$(ROOT_DIR)@$(REF)
+	uv pip install 'zundler @ git+file:////$(ROOT_DIR)@$(REF)'
 endef
 
 
@@ -108,7 +108,6 @@ $(OUTPUT)/readthedocs.html: Makefile
 	NAME=readthedocs.org ; \
 	DOCS=docs ; \
 	. $(DOWNLOAD)/$$NAME/venv/bin/activate && \
-	zundler --version ; exit ; \
 	uv pip install -r $(DOWNLOAD)/$$NAME/requirements/docs.txt && \
 	cd $(DOWNLOAD)/$$NAME/$$DOCS && \
 	sphinx-build -b zundler . _build/zundler && \
