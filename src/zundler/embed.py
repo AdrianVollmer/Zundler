@@ -87,10 +87,10 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
         },
     }
 
-    global_context = json.dumps(global_context)
-    logger.debug("total asset size: %d" % len(global_context))
-    global_context = deflate(global_context)
-    logger.debug("total asset size (compressed): %d" % len(global_context))
+    global_context_serialized = json.dumps(global_context)
+    logger.debug("total asset size: %d" % len(global_context_serialized))
+    global_context_zipped = deflate(global_context_serialized)
+    logger.debug("total asset size (compressed): %d" % len(global_context_zipped))
 
     result = """
 <!DOCTYPE html>
@@ -111,9 +111,9 @@ https://github.com/AdrianVollmer/Zundler
         style=init_files["init.css"],
         body=init_files["init.html"],
         bootstrap=init_files["zundler_bootstrap.js"],
-        global_context=global_context,
         license=init_files["LICENSE"],
         version=__version__,
+        global_context=global_context_zipped,
     )
 
     if isinstance(output_path, str):
@@ -137,36 +137,19 @@ def prepare_file(filename):
     """
     _, ext = os.path.splitext(filename)
     ext = ext.lower()[1:]
-    data = open(filename, "rb").read()
-    mime_type = get_mime_type(filename, data)
+    buffer = open(filename, "rb").read()
+    mime_type = get_mime_type(filename, buffer)
     base64encoded = False
 
     if ext == "css":
         # assuming all CSS files have names ending in '.css'
-        data = embed_css_resources(data, filename)
+        buffer = embed_css_resources(buffer, filename)
 
-    elif ext in [
-        "png",
-        "jpg",
-        "jpeg",
-        "woff",
-        "woff2",
-        "eot",
-        "ttf",
-        "gif",
-        "ico",
-        "wasm",
-    ]:
-        # JSON doesn't allow binary data
-        data = base64.b64encode(data).decode()
+    try:
+        data = buffer.decode()
+    except UnicodeError:
+        data = base64.b64encode(buffer).decode()
         base64encoded = True
-
-    if not isinstance(data, str):
-        try:
-            data = data.decode()
-        except UnicodeError:
-            data = base64.b64encode(data).decode()
-            base64encoded = True
 
     logger.debug("loaded file: %s [%s, %d bytes]" % (filename, mime_type, len(data)))
 
