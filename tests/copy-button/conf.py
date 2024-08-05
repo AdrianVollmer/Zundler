@@ -1,4 +1,3 @@
-from sphinx.application import Sphinx
 
 project = "copy-button"
 copyright = "2024, Adrian Vollmer"

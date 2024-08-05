@@ -1,4 +1,3 @@
-import pydata_sphinx_theme
 
 project = "pydata-theme"
 copyright = "2024, Adrian Vollmer"

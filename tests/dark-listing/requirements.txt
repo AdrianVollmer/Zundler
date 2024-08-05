@@ -1,4 +1,4 @@
-sphinx
+sphinx<8
 furo
 pygments-github-lexers
 -e ../..

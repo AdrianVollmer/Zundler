@@ -1,4 +1,4 @@
-sphinx
+sphinx<8
 sphinx-design
 sphinx-book-theme
 pydata-sphinx-theme

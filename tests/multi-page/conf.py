@@ -1,4 +1,3 @@
-from sphinx.application import Sphinx
 
 project = "multi-page"
 copyright = "2024, Adrian Vollmer"
