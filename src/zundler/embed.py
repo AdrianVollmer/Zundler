@@ -162,10 +162,10 @@ def prepare_file(filename):
     return result
 
 
-def deflate(data):
-    data = zlib.compress(data.encode())
-    data = base64.b64encode(data).decode()
-    return data
+def deflate(data: str) -> str:
+    data_zipped = zlib.compress(data.encode())
+    data_b64 = base64.b64encode(data_zipped).decode()
+    return data_b64
 
 
 def to_data_uri(filename, mime_type=None):
