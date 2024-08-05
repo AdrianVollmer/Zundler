@@ -304,7 +304,9 @@ def extract_assets(input_path, output_path=None):
         m = re.search(
             '.*<script>.*window.*"(?P<blob>[A-Za-z0-9/+]{128,})".*</script>.*', html
         )
-        blob = m["blob"]
+        if not m:
+            raise RuntimeError("No blob found")
+        blob = m.group("blob")
         blob = base64.b64decode(blob)
         blob = zlib.decompress(blob).decode()
         blob = json.loads(blob)
