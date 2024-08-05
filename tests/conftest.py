@@ -66,7 +66,7 @@ def run_make_commands(request):
     # Get the directory of the current test file
     test_dir = request.fspath.dirname
     cmd = """
-    ( cd .. ; uv venv ) && \\
+    uv venv ../.venv && \\
     . ../.venv/bin/activate && \\
     uv pip install -r requirements.txt && \\
     rm -rf _build && \\
@@ -81,4 +81,9 @@ def run_make_commands(request):
         "dark-listing",
         "pydata-theme",
     ]:
-        subprocess.run(cmd.strip(), shell=True, check=True, cwd=Path(test_dir) / d)
+        subprocess.run(
+            ["bash", "-c", cmd.strip()],
+            shell=True,
+            check=True,
+            cwd=Path(test_dir) / d,
+        )
