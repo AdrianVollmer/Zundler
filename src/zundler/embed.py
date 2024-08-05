@@ -116,8 +116,11 @@ https://github.com/AdrianVollmer/Zundler
         version=__version__,
     )
 
-    with open(output_path, "w") as fp:
-        fp.write(result)
+    if isinstance(output_path, str):
+        with open(output_path, "w") as fp:
+            fp.write(result)
+    else:
+        output_path.write(result)
 
     logger.info("Result written to: %s" % output_path)
     return output_path
