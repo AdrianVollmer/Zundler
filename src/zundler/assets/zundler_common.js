@@ -32,9 +32,9 @@ const isVirtual = (url) => {
 
 const splitUrl = (url) => {
 	// Return a list of three elements: path, GET parameters, anchor
-	var anchor = url.split("#")[1] || "";
-	var getParameters = url.split("#")[0].split("?")[1] || "";
-	var path = url.split("#")[0];
+	const anchor = url.split("#")[1] || "";
+	const getParameters = url.split("#")[0].split("?")[1] || "";
+	let path = url.split("#")[0];
 	path = path.split("?")[0];
 	const result = [path, getParameters, anchor];
 	// console.log("Split URL", url, result);
@@ -43,10 +43,10 @@ const splitUrl = (url) => {
 
 const retrieveFileFromFileTree = (path, callback) => {
 	// console.log("Retrieving file: " + path);
-	var fileTree = window.globalContext.fileTree;
-	var file = fileTree[path];
+	const fileTree = window.globalContext.fileTree;
+	const file = fileTree[path];
 	if (!file) {
-		console.warn("File not found: " + path);
+		console.warn(`File not found: ${path}`);
 	} else {
 		callback(file);
 	}
@@ -92,7 +92,7 @@ const fixLink = (a) => {
 		// can define the function as a string
 		a.setAttribute("onclick", "virtualClick(event)");
 	} else if (href.startsWith("#")) {
-		a.setAttribute("href", "about:srcdoc" + a.getAttribute("href"));
+		a.setAttribute("href", `about:srcdoc${a.getAttribute("href")}`);
 	} else if (
 		!href.startsWith("about:srcdoc") &&
 		!href.startsWith("javascript:")
@@ -104,8 +104,8 @@ const fixLink = (a) => {
 };
 
 const fixForm = (form) => {
-	var href = form.getAttribute("action");
-	if (isVirtual(href) && form.getAttribute("method").toLowerCase() == "get") {
+	const href = form.getAttribute("action");
+	if (isVirtual(href) && form.getAttribute("method").toLowerCase() === "get") {
 		form.setAttribute("onsubmit", "virtualClick(event)");
 	}
 };
@@ -114,13 +114,13 @@ const embedImg = (img) => {
 	if (img.hasAttribute("src")) {
 		const src = img.getAttribute("src");
 		if (isVirtual(src)) {
-			var path = normalizePath(src);
+			const path = normalizePath(src);
 			retrieveFile(path, (file) => {
 				const mime_type = file.mime_type;
-				if (mime_type == "image/svg+xml") {
+				if (mime_type === "image/svg+xml") {
 					img.setAttribute(
 						"src",
-						"data:image/svg+xml;charset=utf-8;base64, " + btoa(file.data),
+						`data:image/svg+xml;charset=utf-8;base64, ${btoa(file.data)}`,
 					);
 				} else {
 					img.setAttribute("src", `data:${mime_type};base64, ${file.data}`);
@@ -143,9 +143,9 @@ const fixScriptTag = (doc, oldScript) => {
 			const src = newScript.getAttribute("src");
 			let [path, getParameters, anchor] = splitUrl(src);
 			path = normalizePath(path);
-			console.debug("Embed script: " + path);
+			console.debug(`Embed script: ${path}`);
 			retrieveFile(path, (file) => {
-				const src = file.data + " \n//# sourceURL=" + path;
+				const src = `${file.data}\n//# sourceURL=${path}`;
 				newScript.appendChild(doc.createTextNode(src));
 				newScript.removeAttribute("src");
 				oldScript.parentNode.replaceChild(newScript, oldScript);
@@ -153,7 +153,7 @@ const fixScriptTag = (doc, oldScript) => {
 		}
 	} catch (e) {
 		// Make sure all scripts are loaded
-		console.error("Caught error in " + oldScript.getAttribute("src"), e);
+		console.error(`Caught error in ${oldScript.getAttribute("src")}`, e);
 	}
 };
 
@@ -166,7 +166,7 @@ const embedJs = (doc) => {
 const embedCss = (doc) => {
 	Array.from(doc.querySelectorAll("link")).forEach((link) => {
 		if (link.getAttribute("rel") == "stylesheet" && link.getAttribute("href")) {
-			var href = link.getAttribute("href");
+			const href = link.getAttribute("href");
 			let [path, getParameters, anchor] = splitUrl(href);
 			path = normalizePath(path);
 			retrieveFile(path, (file) => {
@@ -198,23 +198,24 @@ const embedImgs = (doc) => {
 
 const normalizePath = (path) => {
 	// make relative paths absolute
-	var result = window.globalContext.current_path;
+	let result = window.globalContext.current_path;
 	result = result.split("/");
 	result.pop();
 	// path can be a request object
+	let path_ = path;
 	if (!(typeof path === "string" || path instanceof String)) {
-		path = path.href;
+		path_ = path.href;
 	}
-	result = result.concat(path.split("/"));
+	result = result.concat(path_.split("/"));
 
 	// resolve relative directories
-	var array = [];
+	const array = [];
 	Array.from(result).forEach((component) => {
-		if (component == "..") {
+		if (component === "..") {
 			if (array) {
 				array.pop();
 			}
-		} else if (component == ".") {
+		} else if (component === ".") {
 		} else {
 			if (component) {
 				array.push(component);
