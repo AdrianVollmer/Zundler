@@ -114,6 +114,11 @@ const observer = new MutationObserver((mutationList) => {
 			for (const form of Array.from(mutation.target.querySelectorAll("form"))) {
 				fixForm(form);
 			}
+			for (const scr of Array.from(
+				mutation.target.querySelectorAll("script"),
+			)) {
+				fixScriptTag(document, scr);
+			}
 		}
 	}
 });

@@ -168,3 +168,31 @@ def test_pydata_theme(selenium_drivers):
     logo = selenium.find_element(By.CSS_SELECTOR, "img.logo__image.only-dark")
 
     assert logo.get_attribute("src").startswith("data:image/svg+xml;")
+
+
+def test_rtd_theme(selenium_drivers):
+    path = Path("//mnt//rtd-theme//_build//zundler//index.html")
+    selenium = selenium_drivers["firefox"]
+    selenium.get(path.as_uri())
+
+    time.sleep(1)
+
+    assert "rtd-theme documentation" in selenium.title
+
+    selenium.switch_to.frame("zundler-iframe")
+
+    searchbox = selenium.find_element(
+        By.CSS_SELECTOR, "#rtd-search-form input[type='text']"
+    )
+
+    searchbox.send_keys("butterfly" + Keys.ENTER)
+
+    selenium.switch_to.parent_frame()
+    time.sleep(1)
+    selenium.switch_to.frame("zundler-iframe")
+
+    assert selenium.title.startswith("Search")
+
+    span = selenium.find_element(By.CSS_SELECTOR, "span.highlighted")
+
+    assert span.text == "butterfly"
