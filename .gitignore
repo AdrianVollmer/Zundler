@@ -2,5 +2,7 @@
 build
 dist
 tests
+src
 _download
 _version.py
+.*_cache
