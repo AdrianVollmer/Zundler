@@ -132,9 +132,9 @@ const embedImg = (img) => {
 
 const fixScriptTag = (doc, oldScript) => {
 	const newScript = doc.createElement("script");
-	Array.from(oldScript.attributes).forEach((attr) => {
+	for (const attr of Array.from(oldScript.attributes)) {
 		newScript.setAttribute(attr.name, attr.value);
-	});
+	}
 	try {
 		if (
 			newScript.hasAttribute("src") &&
@@ -158,14 +158,17 @@ const fixScriptTag = (doc, oldScript) => {
 };
 
 const embedJs = (doc) => {
-	Array.from(doc.querySelectorAll("script")).forEach((oldScript) => {
+	for (const oldScript of Array.from(doc.querySelectorAll("script"))) {
 		fixScriptTag(doc, oldScript);
-	});
+	}
 };
 
 const embedCss = (doc) => {
-	Array.from(doc.querySelectorAll("link")).forEach((link) => {
-		if (link.getAttribute("rel") == "stylesheet" && link.getAttribute("href")) {
+	for (const link of Array.from(doc.querySelectorAll("link"))) {
+		if (
+			link.getAttribute("rel") === "stylesheet" &&
+			link.getAttribute("href")
+		) {
 			const href = link.getAttribute("href");
 			let [path, getParameters, anchor] = splitUrl(href);
 			path = normalizePath(path);
@@ -175,25 +178,25 @@ const embedCss = (doc) => {
 				link.replaceWith(style);
 			});
 		}
-	});
+	}
 };
 
 const fixLinks = (doc) => {
-	Array.from(doc.querySelectorAll("a")).forEach((a) => {
+	for (const a of Array.from(doc.querySelectorAll("a"))) {
 		fixLink(a);
-	});
+	}
 };
 
 const fixForms = (doc) => {
-	Array.from(doc.querySelectorAll("form")).forEach((form) => {
+	for (const form of Array.from(doc.querySelectorAll("form"))) {
 		fixForm(form);
-	});
+	}
 };
 
 const embedImgs = (doc) => {
-	Array.from(doc.querySelectorAll("img")).forEach((img) => {
+	for (const img of Array.from(doc.querySelectorAll("img"))) {
 		embedImg(img);
-	});
+	}
 };
 
 const normalizePath = (path) => {
@@ -210,7 +213,7 @@ const normalizePath = (path) => {
 
 	// resolve relative directories
 	const array = [];
-	Array.from(result).forEach((component) => {
+	for (const component of Array.from(result)) {
 		if (component === "..") {
 			if (array) {
 				array.pop();
@@ -221,7 +224,7 @@ const normalizePath = (path) => {
 				array.push(component);
 			}
 		}
-	});
+	}
 
 	result = array.join("/");
 	// console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
