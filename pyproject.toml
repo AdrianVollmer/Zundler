@@ -38,6 +38,11 @@ source = "vcs"
 [tool.hatch.build.hooks.vcs]
 version-file = "_version.py"
 
+[tool.hatch.build.targets.sdist]
+include = [
+  "src",
+]
+
 [project.entry-points]
 "sphinx.builders" = {zundler = "zundler.sphinxext"}
 
