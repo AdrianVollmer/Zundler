@@ -102,7 +102,7 @@ const embedImgFromParent = (img) => {
 };
 
 const observer = new MutationObserver((mutationList) => {
-	// console.log("Fix mutated elements...", mutationList);
+	if (DEBUG) console.log("Fix mutated elements...", mutationList);
 	for (const mutation of mutationList) {
 		if (mutation.type === "childList") {
 			for (const a of Array.from(mutation.target.querySelectorAll("a"))) {

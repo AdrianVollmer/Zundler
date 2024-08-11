@@ -5,11 +5,10 @@ try:
     import importlib.metadata as importlib_metadata
 except ImportError:
     # use the shim package importlib-metadata pre-3.8
-    import importlib_metadata as importlib_metadata
+    import importlib_metadata as importlib_metadata  # type: ignore
 
 try:
     __version__ = importlib_metadata.version(__package__ or __name__)
-    #  __summary__ = importlib_metadata.metadata(__package__ or __name__)['summary']
     __summary__ = (
         "Bundle assets of distributed HTML docs into one self-contained HTML file"
     )
@@ -27,6 +26,14 @@ parser.add_argument(
     "--version",
     action="version",
     version=__version__,
+)
+
+parser.add_argument(
+    "-d",
+    "--debug",
+    default=False,
+    action="store_true",
+    help="enable debug mode",
 )
 
 parser.add_argument(

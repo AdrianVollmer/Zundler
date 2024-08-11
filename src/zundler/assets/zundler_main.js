@@ -159,7 +159,7 @@ function main() {
 	window.addEventListener(
 		"message",
 		(evnt) => {
-			console.log("Received message in parent", evnt.data);
+			if (DEBUG) console.log("Received message in parent", evnt.data);
 			const iframe = document.getElementById(iFrameId);
 
 			if (evnt.data.action === "ready") {

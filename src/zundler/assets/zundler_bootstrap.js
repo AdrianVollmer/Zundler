@@ -25,8 +25,10 @@ async function decompressBase64Gzip(base64String) {
 	const chunks = [];
 
 	let result;
-	while (!(result = await reader.read()).done) {
+	result = await reader.read();
+	while (!result.done) {
 		chunks.push(result.value);
+		result = await reader.read();
 	}
 
 	// Concatenate all chunks into a single Uint8Array

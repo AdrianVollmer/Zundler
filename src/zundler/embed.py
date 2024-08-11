@@ -42,8 +42,13 @@ SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 
 
-def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
+def embed_assets(
+    index_file, output_path=None, append_pre="", append_post="", debug=False
+):
+    DEBUG = f"const DEBUG = {'true' if debug else 'false'};"
+
     init_files = {}
+
     for filename in [
         "init.css",
         "init.html",
@@ -56,10 +61,16 @@ def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
     ]:
         path = os.path.join(SCRIPT_PATH, "assets", filename)
         init_files[filename] = open(path, "r").read()
+
+        if filename == "zundler_main.js":
+            init_files[filename] = DEBUG + init_files[filename]
+
         if filename == "inject_pre.js":
-            init_files[filename] = append_pre + init_files[filename]
+            init_files[filename] = DEBUG + append_pre + init_files[filename]
+
         if filename == "inject_post.js":
             init_files[filename] += append_post
+
         if filename.lower().endswith(".js"):
             init_files[filename] += "\n\n//# sourceURL=%s" % filename
 

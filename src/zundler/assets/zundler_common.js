@@ -37,12 +37,12 @@ const splitUrl = (url) => {
 	let path = url.split("#")[0];
 	path = path.split("?")[0];
 	const result = [path, getParameters, anchor];
-	// console.log("Split URL", url, result);
+	if (DEBUG) console.log("Split URL", url, result);
 	return result;
 };
 
 const retrieveFileFromFileTree = (path, callback) => {
-	// console.log("Retrieving file: " + path);
+	if (DEBUG) console.log("Retrieving file: " + path);
 	const fileTree = window.globalContext.fileTree;
 	const file = fileTree[path];
 	if (!file) {
@@ -54,7 +54,7 @@ const retrieveFileFromFileTree = (path, callback) => {
 
 const retrieveFileFromParent = (path, callback) => {
 	// Get the file into the iframe by messaging the parent document
-	// console.log("Retrieving file from parent: " + path);
+	if (DEBUG) console.log("Retrieving file from parent: " + path);
 
 	function messageHandler(event) {
 		if (event.data.action === "sendFile" && event.data.argument.path === path) {
@@ -227,6 +227,9 @@ const normalizePath = (path) => {
 	}
 
 	result = array.join("/");
-	// console.log(`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`);
+	if (DEBUG)
+		console.log(
+			`Normalized path: ${path} -> ${result} (@${window.globalContext.current_path})`,
+		);
 	return result;
 };
