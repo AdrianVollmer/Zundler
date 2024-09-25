@@ -18,17 +18,19 @@ Author: Adrian Vollmer
 import base64
 from fnmatch import fnmatch
 import json
-import logging
 import mimetypes
 import os
 from pathlib import Path
 import re
 import zlib
 
+from sphinx.util import logging
+
+logger = logging.getLogger(__name__)
+
 try:
     import magic
 except ImportError as e:
-    logger = logging.getLogger(__name__)
     logger.error(str(e))
     logger.warning("Using `mimetypes` instead of `python-magic` for mime type guessing")
     magic = None
@@ -37,7 +39,7 @@ from zundler.args import __version__
 
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
 
-logger = logging.getLogger(__name__)
+
 
 
 def embed_assets(index_file, output_path=None, append_pre="", append_post=""):
