@@ -4,7 +4,8 @@ from pathlib import Path
 from sphinx import version_info as sphinx_version_info
 from sphinx.builders.html import StandaloneHTMLBuilder
 from sphinx.locale import get_translation
-from sphinx.util import logging, progress_message
+from sphinx.util import logging
+from sphinx.util.display import progress_message
 from sphinx.util.osutil import relpath
 
 
