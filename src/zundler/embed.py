@@ -240,7 +240,7 @@ def embed_css_resources(css, filename):
             mime_type = "text/css"
             content = embed_css_resources(content, filename)
         else:
-            mime_type = get_mime_type(filename, content)
+            mime_type = get_mime_type(path, content)
         if not mime_type:
             logger.error("Unable to determine mime type: %s" % path)
             mime_type = "application/octet-stream"
