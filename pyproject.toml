@@ -26,11 +26,13 @@ classifiers = [
 ]
 urls = {Homepage = "https://github.com/AdrianVollmer/Zundler"}
 dependencies = [
-    "sphinx",
-    "lxml",
     "python-magic",
 ]
 dynamic = ["version"]
+
+[project.optional-dependencies]
+sphinx = ["sphinx"]
+
 
 [tool.hatch.version]
 source = "vcs"
@@ -66,37 +68,14 @@ testpaths = [
     "tests",
 ]
 
-[tool.hatch.envs.default]
-installer = "uv"
-
-[tool.hatch.envs.test]
-extra-dependencies = [
-    'pytest>=8',
-    'selenium',
-    'pytest-selenium',
-    'pytest-docker',
-]
-
-[tool.hatch.envs.test.scripts]
-all = "pytest {args:tests}"
-
-[tool.hatch.envs.lint]
-dependencies = [
-  "mypy>=1.0.0",
-  "ruff>=0.0.243",
-  "pytest-stub",
-]
-
-[tool.hatch.envs.lint.scripts]
-typing = "mypy --install-types --non-interactive {args:src tests}"
-style = [
-  "ruff check {args:src tests}",
-]
-fmt = [
-  "ruff check --fix {args:src tests}",
-  "style",
-]
-all = [
-  "style",
-  "typing",
+[dependency-groups]
+dev = [
+    "selenium>=4.27.1",
+    "pytest>=8",
+    "selenium",
+    "pytest-selenium",
+    "pytest-docker",
+    "mypy>=1.0.0",
+    "ruff>=0.0.243",
+    "pytest-stub",
 ]

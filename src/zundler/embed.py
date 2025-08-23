@@ -24,7 +24,9 @@ from pathlib import Path
 import re
 import zlib
 
-from sphinx.util import logging
+import logging
+
+from zundler.args import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +37,8 @@ except ImportError as e:
     logger.warning("Using `mimetypes` instead of `python-magic` for mime type guessing")
     magic = None
 
-from zundler.args import __version__
 
 SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
-
-
 
 
 def embed_assets(

@@ -1,12 +1,19 @@
 import os
 from pathlib import Path
+import sys
 
-from sphinx import version_info as sphinx_version_info
-from sphinx.builders.html import StandaloneHTMLBuilder
-from sphinx.locale import get_translation
-from sphinx.util import logging
-from sphinx.util.display import progress_message
-from sphinx.util.osutil import relpath
+try:
+    from sphinx import version_info as sphinx_version_info
+    from sphinx.builders.html import StandaloneHTMLBuilder
+    from sphinx.locale import get_translation
+    from sphinx.util import logging
+    from sphinx.util.display import progress_message
+    from sphinx.util.osutil import relpath
+except ImportError:
+    print(
+        "Sphinx has been made into a optional dependency. Re-install zundler as 'zundler[sphinx]'."
+    )
+    sys.exit(1)
 
 
 __ = get_translation(__name__, "console")
