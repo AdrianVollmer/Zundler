@@ -196,22 +196,50 @@ def to_data_uri(filename, mime_type=None):
     )
 
 
+def _resolve_css_url(url_bytes, filename):
+    """Resolve a relative URL from a CSS file to a filesystem path."""
+    path = url_bytes.decode()
+
+    if "?" in path:
+        path = path.split("?")[0]
+    if "#" in path:
+        path = path.split("#")[0]
+
+    return os.path.dirname(filename) + "/" + path
+
+
 def embed_css_resources(css, filename):
     """Replace `url(<path>)` with `url(data:<mime_type>;base64, ...)`
 
-    Also, handle @import."""
+    Also, handle @import by inlining the imported CSS directly."""
     # This uses some heuristics which will fail in general.
     # Eventually a library like tinycss2 might be preferable.
 
-    # First, make sure all @import's are using url(), because these are both valid:
-    # @import url("foo.css");
-    # @import "foo.css";
-    regex = rb"""(?P<rule>@import\s*['"]?(?P<url>.*?)['"]?\s*;)"""
-    replace_rules = {}
-    for m in re.finditer(regex, css, flags=re.IGNORECASE):
-        if not m["url"].lower().startswith(b"url("):
-            replace_rules[m["rule"]] = b"@import url('%s');" % m["url"]
-    for orig, new in replace_rules.items():
+    # Handle @import: inline imported CSS content directly rather than using
+    # data URIs, because @import url("data:...") doesn't work reliably in
+    # inline <style> elements (especially in srcdoc iframes).
+    # Both forms are valid: @import url("foo.css"); and @import "foo.css";
+    import_regex = rb"""(?P<rule>@import\s+(?:url\(\s*['"]?(?P<url_func>[^'"\)]+?)['"]?\s*\)|['"](?P<url_str>[^'"]+)['"]);)"""
+    import_rules = {}
+    for m in re.finditer(import_regex, css, flags=re.IGNORECASE):
+        url = m["url_func"] or m["url_str"]
+        if url.lower().startswith(b"data:"):
+            continue
+
+        path = _resolve_css_url(url, filename)
+
+        try:
+            content = open(path, "rb").read()
+        except FileNotFoundError as e:
+            logger.error(str(e))
+            continue
+
+        # Recursively process the imported CSS, using its own path for
+        # relative URL resolution
+        content = embed_css_resources(content, path)
+        import_rules[m["rule"]] = content
+
+    for orig, new in import_rules.items():
         css = css.replace(orig, new)
 
     # Quotes are optional. But then URLs can contain escaped characters.
@@ -226,14 +254,7 @@ def embed_css_resources(css, filename):
         if re.match(b"""['"]?data:.*""", m["url"]):
             continue
 
-        path = m["url"].decode()
-
-        if "?" in path:
-            path = path.split("?")[0]
-        if "#" in path:
-            path = path.split("#")[0]
-
-        path = os.path.dirname(filename) + "/" + path
+        path = _resolve_css_url(m["url"], filename)
 
         try:
             content = open(path, "rb").read()
@@ -246,9 +267,6 @@ def embed_css_resources(css, filename):
             mime_type = "font/" + m["format"].decode()
         elif path[-3:].lower() == "eot":
             mime_type = "font/eot"
-        elif path[-3:].lower() == "css":
-            mime_type = "text/css"
-            content = embed_css_resources(content, filename)
         else:
             mime_type = get_mime_type(path, content)
         if not mime_type:
