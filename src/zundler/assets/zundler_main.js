@@ -124,7 +124,7 @@ const loadVirtualPage = (path, getParams, anchor) => {
 		return false;
 	}
 
-	const data = file.data;
+	let data = file.data;
 	window.globalContext.getParameters = getParams;
 
 	// libmagic doesn't properly recognize mimetype of HTMl files that start
@@ -145,6 +145,9 @@ const loadVirtualPage = (path, getParams, anchor) => {
 		window.document.body.append(iframe);
 
 		return true;
+	}
+	if (file.base64encoded) {
+		data = _base64ToArrayBuffer(data);
 	}
 	const blob = new Blob([data], { type: file.mime_type });
 	const url = URL.createObjectURL(blob);
