@@ -1,6 +1,6 @@
 import os
-from pathlib import Path
 import sys
+from pathlib import Path
 
 try:
     from sphinx import version_info as sphinx_version_info

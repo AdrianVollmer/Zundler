@@ -16,15 +16,14 @@ Author: Adrian Vollmer
 """
 
 import base64
-from fnmatch import fnmatch
 import json
+import logging
 import mimetypes
 import os
-from pathlib import Path
 import re
 import zlib
-
-import logging
+from fnmatch import fnmatch
+from pathlib import Path
 
 from zundler.args import __version__
 
@@ -59,7 +58,7 @@ def embed_assets(
         "LICENSE",
     ]:
         path = os.path.join(SCRIPT_PATH, "assets", filename)
-        init_files[filename] = open(path, "r").read()
+        init_files[filename] = open(path).read()
 
         if filename == "zundler_main.js":
             init_files[filename] = DEBUG + init_files[filename]
@@ -327,7 +326,7 @@ def extract_assets(input_path, output_path=None):
     if not output_path:
         output_path = "."
 
-    html = open(input_path, "r").read()
+    html = open(input_path).read()
 
     try:
         # Find large base64 blob
