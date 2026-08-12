@@ -1,4 +1,3 @@
-import os
 import sys
 from pathlib import Path
 
@@ -10,9 +9,7 @@ try:
     from sphinx.util.display import progress_message
     from sphinx.util.osutil import relpath
 except ImportError:
-    print(
-        "Sphinx has been made into a optional dependency. Re-install zundler as 'zundler[sphinx]'."
-    )
+    print("Sphinx has been made into a optional dependency. Re-install zundler as 'zundler[sphinx]'.")
     sys.exit(1)
 
 
@@ -30,9 +27,7 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
         else:
             super().__init__(app)
 
-        self.epilog = "Your self-contained HTML file is now in %s." % relpath(
-            self.app.original_outdir
-        )
+        self.epilog = f"Your self-contained HTML file is now in {relpath(self.app.original_outdir)}."
 
     def run_zundler(self):
         from zundler.embed import embed_assets
@@ -41,15 +36,8 @@ class ZundlerBuilder(StandaloneHTMLBuilder):
         if not root_doc:
             root_doc = self.config.root_doc
 
-        input_path = os.path.join(
-            self.outdir,
-            root_doc + ".html",
-        )
-
-        output_path = os.path.join(
-            self.app.original_outdir,
-            root_doc + ".html",
-        )
+        input_path = Path(self.outdir) / (root_doc + ".html")
+        output_path = Path(self.app.original_outdir) / (root_doc + ".html")
 
         with progress_message(__("embedding HTML assets")):
             embed_assets(
@@ -67,14 +55,8 @@ def run_zundler(app, exception):
 def setup(app):
     # Fix the outdir. We want to build the files into $builddir/html first,
     # then $builddir/$target second.
-    outdir = os.path.join(
-        os.path.dirname(app.outdir),
-        "html",
-    )
-    doctreedir = os.path.join(
-        os.path.dirname(app.outdir),
-        "doctree",
-    )
+    outdir = Path(app.outdir).parent / "html"
+    doctreedir = Path(app.outdir).parent / "doctree"
     app.original_outdir = app.outdir
 
     # Preserve types of app.outdir and app.doctreedir.

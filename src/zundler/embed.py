@@ -19,7 +19,6 @@ import base64
 import json
 import logging
 import mimetypes
-import os
 import re
 import zlib
 from fnmatch import fnmatch
@@ -37,13 +36,11 @@ except ImportError as e:
     magic = None
 
 
-SCRIPT_PATH = os.path.abspath(os.path.dirname(__file__))
+SCRIPT_PATH = Path(__file__).resolve().parent
 
 
-def embed_assets(
-    index_file, output_path=None, append_pre="", append_post="", debug=False
-):
-    DEBUG = f"const DEBUG = {'true' if debug else 'false'};"
+def embed_assets(index_file, output_path=None, append_pre="", append_post="", debug=False):
+    debug_const = f"const DEBUG = {'true' if debug else 'false'};"
 
     init_files = {}
 
@@ -57,30 +54,31 @@ def embed_assets(
         "inject_post.js",
         "LICENSE",
     ]:
-        path = os.path.join(SCRIPT_PATH, "assets", filename)
-        init_files[filename] = open(path).read()
+        path = SCRIPT_PATH / "assets" / filename
+        init_files[filename] = path.read_text()
 
         if filename == "zundler_main.js":
-            init_files[filename] = DEBUG + init_files[filename]
+            init_files[filename] = debug_const + init_files[filename]
 
         if filename == "inject_pre.js":
-            init_files[filename] = DEBUG + append_pre + init_files[filename]
+            init_files[filename] = debug_const + append_pre + init_files[filename]
 
         if filename == "inject_post.js":
             init_files[filename] += append_post
 
         if filename.lower().endswith(".js"):
-            init_files[filename] += "\n\n//# sourceURL=%s" % filename
+            init_files[filename] += f"\n\n//# sourceURL={filename}"
 
-    if not os.path.exists(index_file):
-        raise FileNotFoundError("no such file: %s" % index_file)
+    index_file = Path(index_file)
+    if not index_file.exists():
+        raise FileNotFoundError(f"no such file: {index_file}")
 
-    base_dir = os.path.dirname(index_file)
-    base_name = os.path.basename(index_file)
+    base_dir = index_file.parent
+    base_name = index_file.name
     new_base_name = "SELF_CONTAINED_" + base_name
 
     if not output_path:
-        output_path = os.path.join(base_dir, new_base_name)
+        output_path = base_dir / new_base_name
 
     file_tree = load_filetree(
         base_dir,
@@ -99,9 +97,9 @@ def embed_assets(
     }
 
     global_context_serialized = json.dumps(global_context)
-    logger.debug("total asset size: %d" % len(global_context_serialized))
+    logger.debug("total asset size: %d", len(global_context_serialized))
     global_context_zipped = deflate(global_context_serialized)
-    logger.debug("total asset size (compressed): %d" % len(global_context_zipped))
+    logger.debug("total asset size (compressed): %d", len(global_context_zipped))
 
     result = """
 <!DOCTYPE html>
@@ -127,13 +125,12 @@ https://github.com/AdrianVollmer/Zundler
         global_context=global_context_zipped,
     )
 
-    if isinstance(output_path, str):
-        with open(output_path, "w") as fp:
-            fp.write(result)
-    else:
+    if hasattr(output_path, "write"):
         output_path.write(result)
+    else:
+        Path(output_path).write_text(result)
 
-    logger.info("Result written to: %s" % output_path)
+    logger.info("Result written to: %s", output_path)
     return output_path
 
 
@@ -146,9 +143,8 @@ def prepare_file(filename):
     `filename`: The name of the file
 
     """
-    _, ext = os.path.splitext(filename)
-    ext = ext.lower()[1:]
-    buffer = open(filename, "rb").read()
+    ext = Path(filename).suffix.lower()[1:]
+    buffer = Path(filename).read_bytes()
     mime_type = get_mime_type(filename, buffer)
     base64encoded = False
 
@@ -162,37 +158,31 @@ def prepare_file(filename):
         data = base64.b64encode(buffer).decode()
         base64encoded = True
 
-    logger.debug("loaded file: %s [%s, %d bytes]" % (filename, mime_type, len(data)))
+    logger.debug("loaded file: %s [%s, %d bytes]", filename, mime_type, len(data))
 
-    result = {
+    return {
         "data": data,
         "mime_type": mime_type,
         "base64encoded": base64encoded,
     }
 
-    return result
-
 
 def deflate(data: str) -> str:
     data_zipped = zlib.compress(data.encode())
-    data_b64 = base64.b64encode(data_zipped).decode()
-    return data_b64
+    return base64.b64encode(data_zipped).decode()
 
 
 def to_data_uri(filename, mime_type=None):
     """Create a data URI from the contents of a file"""
 
     try:
-        data = open(filename, "br").read()
+        data = Path(filename).read_bytes()
     except FileNotFoundError as e:
         logger.error(str(e))
     data = base64.b64encode(data)
     if not mime_type:
         mime_type = "application/octet-stream"
-    return "data:%s;charset=utf-8;base64, %s" % (
-        mime_type,
-        data.decode(),
-    )
+    return f"data:{mime_type};charset=utf-8;base64, {data.decode()}"
 
 
 def _resolve_css_url(url_bytes, filename):
@@ -204,7 +194,7 @@ def _resolve_css_url(url_bytes, filename):
     if "#" in path:
         path = path.split("#")[0]
 
-    return os.path.dirname(filename) + "/" + path
+    return str(Path(filename).parent / path)
 
 
 def embed_css_resources(css, filename):
@@ -218,7 +208,10 @@ def embed_css_resources(css, filename):
     # data URIs, because @import url("data:...") doesn't work reliably in
     # inline <style> elements (especially in srcdoc iframes).
     # Both forms are valid: @import url("foo.css"); and @import "foo.css";
-    import_regex = rb"""(?P<rule>@import\s+(?:url\(\s*['"]?(?P<url_func>[^'"\)]+?)['"]?\s*\)|['"](?P<url_str>[^'"]+)['"]);)"""
+    import_regex = (
+        rb"""(?P<rule>@import\s+(?:url\(\s*['"]?(?P<url_func>[^'"\)]+?)['"]?\s*\)"""
+        rb"""|['"](?P<url_str>[^'"]+)['"]);)"""
+    )
     import_rules = {}
     for m in re.finditer(import_regex, css, flags=re.IGNORECASE):
         url = m["url_func"] or m["url_str"]
@@ -228,7 +221,7 @@ def embed_css_resources(css, filename):
         path = _resolve_css_url(url, filename)
 
         try:
-            content = open(path, "rb").read()
+            content = Path(path).read_bytes()
         except FileNotFoundError as e:
             logger.error(str(e))
             continue
@@ -256,7 +249,7 @@ def embed_css_resources(css, filename):
         path = _resolve_css_url(m["url"], filename)
 
         try:
-            content = open(path, "rb").read()
+            content = Path(path).read_bytes()
         except FileNotFoundError as e:
             logger.error(str(e))
             continue
@@ -269,17 +262,14 @@ def embed_css_resources(css, filename):
         else:
             mime_type = get_mime_type(path, content)
         if not mime_type:
-            logger.error("Unable to determine mime type: %s" % path)
+            logger.error("Unable to determine mime type: %s", path)
             mime_type = "application/octet-stream"
         content = base64.b64encode(content)
 
-        replace_rules[m["url_statement"]] = (
-            b'url("data:%(mime_type)s;charset=utf-8;base64, %(content)s")'
-            % {
-                b"content": content,
-                b"mime_type": mime_type.encode(),
-            }
-        )
+        replace_rules[m["url_statement"]] = b'url("data:%(mime_type)s;charset=utf-8;base64, %(content)s")' % {
+            b"content": content,
+            b"mime_type": mime_type.encode(),
+        }
 
     for orig, new in replace_rules.items():
         css = css.replace(orig, new)
@@ -294,9 +284,7 @@ def get_mime_type(filename, buffer):
         mime_type = magic.Magic(mime=True).from_buffer(buffer)
 
     if not mime_type:
-        logger.error(
-            "Unknown mime type (%s): %s" % (filename, str(buffer[:10]) + "...")
-        )
+        logger.error("Unknown mime type (%s): %s", filename, str(buffer[:10]) + "...")
         mime_type = "application/octet-stream"
 
     return mime_type
@@ -313,7 +301,7 @@ def load_filetree(base_dir, exclude_pattern=None):
         if path.is_file():
             key = path.relative_to(base_dir).as_posix()
             result[key] = prepare_file(path.as_posix())
-            logger.debug("Packed file %s [%d]" % (key, len(result[key])))
+            logger.debug("Packed file %s [%d]", key, len(result[key]))
 
     return result
 
@@ -326,13 +314,11 @@ def extract_assets(input_path, output_path=None):
     if not output_path:
         output_path = "."
 
-    html = open(input_path).read()
+    html = Path(input_path).read_text()
 
     try:
         # Find large base64 blob
-        m = re.search(
-            '.*<script>.*window.*"(?P<blob>[A-Za-z0-9/+]{128,})".*</script>.*', html
-        )
+        m = re.search('.*<script>.*window.*"(?P<blob>[A-Za-z0-9/+]{128,})".*</script>.*', html)
         if not m:
             raise RuntimeError("No blob found")
         blob = m.group("blob")
@@ -342,19 +328,17 @@ def extract_assets(input_path, output_path=None):
         file_tree = blob["fileTree"]
     except Exception as e:
         logger.error(str(e))
-        logger.error("Does not look like a Zundler output file: %s" % input_path)
+        logger.error("Does not look like a Zundler output file: %s", input_path)
         exit(1)
 
+    output_path = Path(output_path)
     for filename, file in file_tree.items():
-        filename = os.path.join(output_path, filename)
-        os.makedirs(os.path.dirname(filename) or ".", exist_ok=True)
+        out_file = output_path / filename
+        out_file.parent.mkdir(parents=True, exist_ok=True)
         data = file["data"]
-        if file["base64encoded"]:
-            data = base64.b64decode(data)
-        else:
-            data = data.encode()
-        open(filename, "wb").write(data)
+        data = base64.b64decode(data) if file["base64encoded"] else data.encode()
+        out_file.write_bytes(data)
         file["data"] = file["data"][:100] + "..."
 
-    with open(os.path.join(output_path, "file_tree.json"), "w") as fp:
+    with (output_path / "file_tree.json").open("w") as fp:
         json.dump(file_tree, fp, indent=2)

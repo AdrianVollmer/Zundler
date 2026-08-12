@@ -9,9 +9,7 @@ except ImportError:
 
 try:
     __version__ = importlib_metadata.version(__package__ or __name__)
-    __summary__ = (
-        "Bundle assets of distributed HTML docs into one self-contained HTML file"
-    )
+    __summary__ = "Bundle assets of distributed HTML docs into one self-contained HTML file"
 except importlib_metadata.PackageNotFoundError:
     __version__ = "??"
     __summary__ = "??"
@@ -73,6 +71,4 @@ parser.add_argument(
 
 
 def parse_args(argv=None):
-    args = parser.parse_args(argv)
-
-    return args
+    return parser.parse_args(argv)
