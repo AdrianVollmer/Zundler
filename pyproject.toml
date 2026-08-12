@@ -45,6 +45,12 @@ include = [
   "src",
 ]
 
+[tool.hatch.build.targets.wheel]
+# Ship only the generated JS assets, not the TypeScript sources.
+exclude = [
+  "src/zundler/assets_ts",
+]
+
 [project.entry-points]
 "sphinx.builders" = {zundler = "zundler.sphinxext"}
 
@@ -85,4 +91,5 @@ dev = [
     "ruff>=0.0.243",
     "pytest-stub",
     "hatch>=1.18.0",
+    "deno>=2.9.5",
 ]

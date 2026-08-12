@@ -4,25 +4,36 @@ package_name := "zundler"
 default:
     @just --list
 
-# Lint the code with ruff
+# Lint Python (ruff) and the TypeScript assets (deno)
 lint:
     uv run ruff check src tests
+    uv run deno lint
+    uv run deno check src/zundler/assets_ts/*.ts
 
-# Format the code with ruff
+# Format Python (ruff) and the TypeScript assets (deno)
 format:
     uv run ruff format src tests
+    uv run deno fmt
 
-# Run the test suite
+# Run the Python test suite
 test:
     uv run pytest
+
+# Run the JavaScript unit tests (Node's built-in test runner)
+test-js:
+    node --test tests/js/*.test.js
 
 # Remove build artifacts and caches
 clean:
     rm -rf build __pycache__ *.egg-info docs/_build .docvenv .nox dist \
         {{package_name}}/*.egg-info {{package_name}}/__pycache__
 
-# Build the distribution packages
-build:
+# Transpile the TypeScript assets to plain JS
+build-assets:
+    uv run deno task build
+
+# Transpile the TypeScript assets, then build the distribution packages
+build: build-assets
     uv run hatch build
 
 # Upload the latest sdist to TestPyPI
