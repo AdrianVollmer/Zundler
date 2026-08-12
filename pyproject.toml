@@ -7,7 +7,7 @@ name = "zundler"
 description = "Bundle assets of distributed HTML docs into one self-contained HTML file"
 readme = 'README.md'
 authors = [{name = "Adrian Vollmer", email = "computerfluesterer@protonmail.com"}]
-requires-python = ">=3.8"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -51,8 +51,14 @@ include = [
 [project.scripts]
 zundler = "zundler.__main__:main"
 
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "RET", "PTH", "RUF"]
+
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.11"
 show_column_numbers = true
 show_error_context = true
 ignore_missing_imports = true
