@@ -16,7 +16,12 @@ const _base64ToArrayBuffer = (base64) => {
 };
 
 const isVirtual = (url) => {
-	// Return true if the url should be retrieved from the virtual file tree
+	// Return true if the url should be retrieved from the virtual file tree.
+	// A missing attribute (e.g. `getAttribute("href")` on a named-target
+	// anchor) yields null; such elements are not virtual links.
+	if (url == null) {
+		return false;
+	}
 	const _url = url.toString().toLowerCase();
 	return !(
 		_url === "" ||
@@ -86,6 +91,10 @@ const retrieveFile = (path, callback) => {
 
 const fixLink = (a) => {
 	const href = a.getAttribute("href");
+	if (href == null) {
+		// e.g. named-target anchors (<a name="section">): nothing to rewrite.
+		return;
+	}
 	if (isVirtual(href)) {
 		// virtualClick will be defined in the iFrame, but fixLink may be
 		// called in the parent document, so we use `onclick`, because we
@@ -233,3 +242,16 @@ const normalizePath = (path) => {
 		);
 	return result;
 };
+
+// Expose helpers for unit tests when loaded under Node. In the browser this
+// script is injected as a <script> textContent, where `module` is undefined,
+// so the guard is a no-op there.
+if (typeof module !== "undefined" && module.exports) {
+	module.exports = {
+		isVirtual,
+		splitUrl,
+		normalizePath,
+		fixLink,
+		fixForm,
+	};
+}
