@@ -84,4 +84,5 @@ dev = [
     "mypy>=1.0.0",
     "ruff>=0.0.243",
     "pytest-stub",
+    "hatch>=1.18.0",
 ]

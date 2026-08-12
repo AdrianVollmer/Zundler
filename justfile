@@ -23,7 +23,7 @@ clean:
 
 # Build the distribution packages
 build:
-    hatch build
+    uv run hatch build
 
 # Upload the latest sdist to TestPyPI
 test-publish:
@@ -39,4 +39,4 @@ publish:
     set -euo pipefail
     file=$(ls -1t dist/{{package_name}}-*.tar.gz | head -n1)
     read -p "Ready to upload $file? Type yes: " ans
-    [ "$ans" = "yes" ] && twine upload "$file"
+    [ "$ans" = "yes" ] && uv publish "$file"
