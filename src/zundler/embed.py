@@ -317,8 +317,9 @@ def extract_assets(input_path, output_path=None):
     html = Path(input_path).read_text()
 
     try:
-        # Find large base64 blob
-        m = re.search('.*<script>.*window.*"(?P<blob>[A-Za-z0-9/+]{128,})".*</script>.*', html)
+        # Find the base64 blob. Anchor on the exact assignment emitted by
+        # embed_assets; the '=' in the class covers base64 padding.
+        m = re.search(r'window\.globalContext = "(?P<blob>[A-Za-z0-9/+=]+)"', html)
         if not m:
             raise RuntimeError("No blob found")
         blob = m.group("blob")

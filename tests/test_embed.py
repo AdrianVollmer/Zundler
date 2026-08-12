@@ -6,7 +6,13 @@ from pathlib import Path
 
 import pytest
 
-from zundler.embed import embed_css_resources, load_filetree, prepare_file
+from zundler.embed import (
+    embed_assets,
+    embed_css_resources,
+    extract_assets,
+    load_filetree,
+    prepare_file,
+)
 
 
 @pytest.fixture
@@ -112,3 +118,30 @@ class TestFileTreeWithImport:
         theme_data = tree["styles/theme.css"]["data"]
         assert "body { margin: 0; }" in theme_data
         assert "@import" not in theme_data
+
+
+class TestExtractAssets:
+    """Round-trip: a file produced by embed_assets must be extractable."""
+
+    def test_embed_extract_roundtrip(self, tmp_path):
+        """extract_assets must recover the embedded files.
+
+        The serialized blob is base64, which may end in '=' padding. The
+        extraction regex must account for that, otherwise ~2/3 of inputs
+        (those whose compressed size is not a multiple of 3) fail to extract.
+        """
+        src = tmp_path / "src"
+        src.mkdir()
+        (src / "index.html").write_text("<html><body><img src='a.png'></body></html>")
+        (src / "a.png").write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 20)
+
+        bundle = src / "bundle.html"
+        embed_assets(str(src / "index.html"), output_path=str(bundle))
+
+        out = tmp_path / "out"
+        out.mkdir()
+        extract_assets(str(bundle), output_path=str(out))
+
+        assert (out / "a.png").read_bytes() == b"\x89PNG\r\n\x1a\n" + b"\x00" * 20
+        assert (out / "index.html").exists()
+        assert (out / "file_tree.json").exists()
