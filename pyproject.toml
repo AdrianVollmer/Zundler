@@ -63,6 +63,10 @@ line-length = 120
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "PTH", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+# Sphinx mandates the `copyright` config name, which shadows the builtin.
+"tests/**/conf.py" = ["A001"]
+
 [tool.mypy]
 python_version = "3.11"
 show_column_numbers = true

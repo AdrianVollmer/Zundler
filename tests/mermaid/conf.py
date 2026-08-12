@@ -1,4 +1,3 @@
-
 project = "mermaid"
 copyright = "2024, Adrian Vollmer"
 author = "Adrian Vollmer"

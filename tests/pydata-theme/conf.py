@@ -1,4 +1,3 @@
-
 project = "pydata-theme"
 copyright = "2024, Adrian Vollmer"
 author = "Adrian Vollmer"

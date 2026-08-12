@@ -1,7 +1,8 @@
-import pytest
 import subprocess
-from selenium import webdriver
 from pathlib import Path
+
+import pytest
+from selenium import webdriver
 
 
 @pytest.fixture(scope="session")
@@ -29,10 +30,7 @@ def is_responsive(port):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         result = sock.connect_ex(("127.0.0.1", port))
-        if result == 0:
-            return True
-        else:
-            return False
+        return result == 0
         sock.close()
     except Exception:
         return False
@@ -45,9 +43,7 @@ def selenium_drivers(docker_ip, docker_services):
 
     for browser in ["firefox"]:
         port = docker_services.port_for(browser, 5900)
-        docker_services.wait_until_responsive(
-            timeout=10.0, pause=0.1, check=lambda: is_responsive(port)
-        )
+        docker_services.wait_until_responsive(timeout=10.0, pause=0.1, check=lambda port=port: is_responsive(port))
 
         options = webdriver.FirefoxOptions()
         drivers[browser] = webdriver.Remote(
@@ -57,7 +53,7 @@ def selenium_drivers(docker_ip, docker_services):
 
     yield drivers
 
-    for browser, driver in drivers.items():
+    for _browser, driver in drivers.items():
         driver.quit()
 
 

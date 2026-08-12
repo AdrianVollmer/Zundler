@@ -1,7 +1,5 @@
 """Unit tests for the embed module."""
 
-import os
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -11,7 +9,6 @@ from zundler.embed import (
     embed_css_resources,
     extract_assets,
     load_filetree,
-    prepare_file,
 )
 
 
@@ -36,7 +33,7 @@ class TestEmbedCssImport:
     def test_import_bare_string(self, css_tree):
         """@import "../basic.css"; should be inlined."""
         theme_path = str(css_tree / "styles" / "theme.css")
-        css = open(theme_path, "rb").read()
+        css = Path(theme_path).read_bytes()
         result = embed_css_resources(css, theme_path)
 
         assert b"@import" not in result
@@ -80,7 +77,7 @@ class TestEmbedCssImport:
         top_css.write_bytes(b'@import "mid.css";\n')
 
         top_path = str(top_css)
-        css = open(top_path, "rb").read()
+        css = Path(top_path).read_bytes()
         result = embed_css_resources(css, top_path)
 
         assert b"@import" not in result

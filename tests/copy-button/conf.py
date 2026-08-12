@@ -1,4 +1,3 @@
-
 project = "copy-button"
 copyright = "2024, Adrian Vollmer"
 author = "Adrian Vollmer"

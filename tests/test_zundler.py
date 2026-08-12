@@ -4,7 +4,6 @@ from pathlib import Path
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
-
 TEST_DIR = Path(__file__).resolve().parent
 
 
@@ -64,9 +63,7 @@ def test_multi_page(selenium_drivers):
 
     selenium.switch_to.frame("zundler-iframe")
 
-    second_link = selenium.find_element(
-        By.XPATH, "//a[text() = 'Second' and @class = 'reference internal']"
-    )
+    second_link = selenium.find_element(By.XPATH, "//a[text() = 'Second' and @class = 'reference internal']")
 
     second_link.click()
 
@@ -78,18 +75,20 @@ def test_multi_page(selenium_drivers):
     # Check link with anchor
 
     #  selenium.switch_to.frame("zundler-iframe")
-#  
-    #  third_link = selenium.find_element(By.CSS_SELECTOR, "#second a.internal")
-#  
-    #  third_link.click()
-#  
-    #  selenium.switch_to.parent_frame()
-    #  time.sleep(1)
-    #  selenium.switch_to.frame("zundler-iframe")
-#  
-    #  assert selenium.title.startswith("Third")
-    #  scroll_height = int(selenium.execute_script("return window.pageYOffset"))
-    #  assert scroll_height > 1000
+
+
+#
+#  third_link = selenium.find_element(By.CSS_SELECTOR, "#second a.internal")
+#
+#  third_link.click()
+#
+#  selenium.switch_to.parent_frame()
+#  time.sleep(1)
+#  selenium.switch_to.frame("zundler-iframe")
+#
+#  assert selenium.title.startswith("Third")
+#  scroll_height = int(selenium.execute_script("return window.pageYOffset"))
+#  assert scroll_height > 1000
 
 
 def test_multi_page_search(selenium_drivers):
@@ -181,9 +180,7 @@ def test_rtd_theme(selenium_drivers):
 
     selenium.switch_to.frame("zundler-iframe")
 
-    searchbox = selenium.find_element(
-        By.CSS_SELECTOR, "#rtd-search-form input[type='text']"
-    )
+    searchbox = selenium.find_element(By.CSS_SELECTOR, "#rtd-search-form input[type='text']")
 
     searchbox.send_keys("butterfly" + Keys.ENTER)
 
